@@ -85,6 +85,33 @@ function section(title, body) {
   `;
 }
 
+function readValue(element) {
+  if (!element) return "";
+  if ("value" in element) return element.value;
+  return element.innerText.trim();
+}
+
+function editable(path, fallback = "", options = {}) {
+  const tag = options.block ? "div" : "span";
+  const value = getValue(path) || fallback;
+  return `<${tag} class="visual-editable" contenteditable="true" data-path="${escapeHtml(path)}">${escapeHtml(value)}</${tag}>`;
+}
+
+function visualText(value = "", attributes = "") {
+  return `<span class="visual-editable" contenteditable="true" ${attributes}>${escapeHtml(value)}</span>`;
+}
+
+function visualTextarea(value = "", attributes = "") {
+  return `<div class="visual-editable multiline" contenteditable="true" ${attributes}>${escapeHtml(value)}</div>`;
+}
+
+function previewAssetUrl(url = "") {
+  const value = String(url);
+  if (value.startsWith("./")) return `../${value.slice(2)}`;
+  if (value.startsWith("assets/")) return `../${value}`;
+  return value;
+}
+
 async function loadLocalDefault() {
   localDefault = await fetch("../data/profile.json").then((response) => response.json());
   return localDefault;
@@ -294,49 +321,205 @@ function renderContactLinks() {
   );
 }
 
+function renderVisualEditor() {
+  return `
+    <section class="visual-editor" data-visual-editor>
+      <div class="visual-note">
+        <strong>可视化编辑模式</strong>
+        <span>直接点击页面里的文字修改。图片可在图片下方输入新的图片路径或网址。</span>
+      </div>
+
+      <section class="hero section visual-section">
+        <div class="hero-copy">
+          <h1>${editable("hero.name")}</h1>
+          <p class="portfolio-title">${editable("hero.portfolioTitle")}</p>
+          <span class="rule"></span>
+          <h2>${editable("hero.headline")}</h2>
+          <p>${editable("hero.summary", "", { block: true })}</p>
+          <ul class="quick-facts" aria-label="快速联系方式">
+            ${(currentProfile.hero?.facts || [])
+              .map(
+                (fact, index) => `
+                  <li>
+                    <span aria-hidden="true">${escapeHtml(fact.icon)}</span>
+                    ${visualText(fact.text, `data-path="hero.facts.${index}.text"`)}
+                  </li>
+                `,
+              )
+              .join("")}
+          </ul>
+        </div>
+        <figure class="hero-media visual-image-editor">
+          <img src="${escapeHtml(previewAssetUrl(currentProfile.hero?.image))}" alt="${escapeHtml(currentProfile.hero?.imageAlt)}" />
+          <label><span>头像图片路径</span><input data-path="hero.image" value="${escapeHtml(currentProfile.hero?.image)}" /></label>
+          <label><span>图片说明</span><input data-path="hero.imageAlt" value="${escapeHtml(currentProfile.hero?.imageAlt)}" /></label>
+        </figure>
+      </section>
+
+      <section class="info-grid section visual-section">
+        <div class="details-block">
+          <div class="section-heading"><h2>${editable("details.heading")}</h2><span class="rule small"></span></div>
+          <dl class="detail-list">
+            ${(currentProfile.details?.items || [])
+              .map(
+                (item, index) => `
+                  <div data-detail-row>
+                    <dt>${visualText(item.label, "data-detail-label")}</dt>
+                    <dd>${visualTextarea(item.value, "data-detail-value")}</dd>
+                    <button class="visual-remove" type="button" data-remove="details" data-index="${index}">删除</button>
+                  </div>
+                `,
+              )
+              .join("")}
+          </dl>
+          <button class="button secondary compact" type="button" data-add="details">Add detail</button>
+        </div>
+
+        <div class="skills-block">
+          <div class="section-heading"><h2>${editable("skills.heading")}</h2><span class="rule small"></span></div>
+          ${(currentProfile.skills?.groups || [])
+            .map(
+              (group, groupIndex) => `
+                <article class="skill-group visual-skill-group" data-skill-group>
+                  <div>
+                    <span class="skill-icon visual-editable" contenteditable="true" data-skill-icon>${escapeHtml(group.icon)}</span>
+                    <h3>${visualText(group.title, "data-skill-title")}</h3>
+                    <button class="visual-remove" type="button" data-remove="skillGroup" data-index="${groupIndex}">删除分类</button>
+                    ${(group.items || [])
+                      .map(
+                        (item, itemIndex) => `
+                          <p data-skill-item>
+                            ${visualText(item.label, "data-skill-label")}
+                            <label class="visual-level"><span>熟练度</span><input data-skill-level type="number" min="0" max="100" value="${escapeHtml(item.level)}" /></label>
+                            <button class="visual-remove inline" type="button" data-remove="skillItem" data-group-index="${groupIndex}" data-index="${itemIndex}">删除</button>
+                          </p>
+                        `,
+                      )
+                      .join("")}
+                    <button class="button secondary compact" type="button" data-add="skillItem" data-group-index="${groupIndex}">Add skill</button>
+                  </div>
+                  <div class="meters">${(group.items || [])
+                    .map((item) => `<span style="--level: ${Number(item.level) || 0}%"></span>`)
+                    .join("")}</div>
+                </article>
+              `,
+            )
+            .join("")}
+          <button class="button secondary compact" type="button" data-add="skillGroup">Add skill group</button>
+        </div>
+      </section>
+
+      <section class="section timeline-section visual-section">
+        <div class="section-heading"><h2>${editable("experience.heading")}</h2><span class="rule small"></span></div>
+        <div class="timeline">
+          ${(currentProfile.experience?.items || [])
+            .map(
+              (item, index) => `
+                <article data-experience-row>
+                  <time>${visualText(item.period, "data-experience-period")}</time>
+                  <div class="timeline-dot"></div>
+                  <div>
+                    <h3>${visualText(item.role, "data-experience-role")}</h3>
+                    <p class="company">${visualText(item.company, "data-experience-company")}</p>
+                    <p>${visualTextarea(item.description, "data-experience-description")}</p>
+                    <button class="visual-remove" type="button" data-remove="experience" data-index="${index}">删除经历</button>
+                  </div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+        <button class="button secondary compact" type="button" data-add="experience">Add experience</button>
+      </section>
+
+      <section class="section projects-section visual-section">
+        <div class="section-heading"><h2>${editable("projects.heading")}</h2><span class="rule small"></span></div>
+        <div class="project-grid">
+          ${(currentProfile.projects?.items || [])
+            .map(
+              (project, index) => `
+                <article class="project-card visual-project-card" data-project-row>
+                  <img src="${escapeHtml(previewAssetUrl(project.image))}" alt="${escapeHtml(project.imageAlt)}" />
+                  <label><span>图片路径</span><input data-project-image value="${escapeHtml(project.image)}" /></label>
+                  <label><span>图片说明</span><input data-project-alt value="${escapeHtml(project.imageAlt)}" /></label>
+                  <h3>${visualText(project.title, "data-project-title")}</h3>
+                  <p>${visualTextarea(project.description, "data-project-description")}</p>
+                  <label><span>案例链接</span><input data-project-case value="${escapeHtml(project.caseStudyUrl)}" /></label>
+                  <label><span>演示链接</span><input data-project-demo value="${escapeHtml(project.demoUrl)}" /></label>
+                  <button class="visual-remove" type="button" data-remove="project" data-index="${index}">删除项目</button>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+        <button class="button secondary compact" type="button" data-add="project">Add project</button>
+      </section>
+
+      <section class="section contact-section visual-section">
+        <div class="contact-copy">
+          <div class="section-heading"><h2>${editable("contact.heading")}</h2><span class="rule small"></span></div>
+          <p>${editable("contact.body", "", { block: true })}</p>
+          <span class="button primary"><span aria-hidden="true">✉</span>${editable("contact.buttonLabel")}</span>
+        </div>
+        <aside class="connect-list">
+          <div class="section-heading"><h2>${editable("contact.connectHeading")}</h2><span class="rule small"></span></div>
+          ${(currentProfile.contact?.links || [])
+            .map(
+              (link, index) => `
+                <div class="visual-link-row" data-link-row>
+                  ${visualText(link.label, "data-link-label")}
+                  <input data-link-url value="${escapeHtml(link.url)}" />
+                  <button class="visual-remove inline" type="button" data-remove="link" data-index="${index}">删除</button>
+                </div>
+              `,
+            )
+            .join("")}
+          <button class="button secondary compact" type="button" data-add="link">Add link</button>
+        </aside>
+      </section>
+    </section>
+  `;
+}
+
 function renderForm() {
   editorMount.innerHTML = `
     <div class="editor-toolbar">
       <div>
-        <h2>Profile Editor</h2>
-        <p>直接修改表单内容，然后保存。刷新公开页面后会看到最新资料。</p>
+        <h2>Visual Editor</h2>
+        <p>像正式页面一样直接编辑文字和图片。修改后点击保存，公开页面刷新后会看到最新资料。</p>
       </div>
       <div class="editor-actions">
         <button class="button secondary" type="button" data-load-default>Load local default</button>
+        <button class="button secondary" type="button" data-toggle-form>Detailed form</button>
         <button class="button secondary" type="button" data-toggle-json>Advanced JSON</button>
         <button class="button primary" type="button" data-save-profile>Save to database</button>
       </div>
     </div>
 
-    <form class="profile-form" data-profile-form>
-      ${section(
-        "首页与基础信息",
-        `
-          <div class="admin-form-grid">
-            ${field("浏览器标题", "site.title")}
-            ${field("页脚文字", "site.footer")}
-            ${field("品牌左半部分", "hero.brandFirst")}
-            ${field("品牌强调部分", "hero.brandAccent")}
-            ${field("首页姓名", "hero.name")}
-            ${field("作品集标题", "hero.portfolioTitle")}
-            ${field("一句话定位", "hero.headline")}
-            ${field("头像路径", "hero.image")}
-            ${field("简历下载链接", "hero.resumeUrl")}
-          </div>
-          ${field("个人简介", "hero.summary", { textarea: true, rows: 4 })}
-          <div class="admin-form-grid">
-            ${field("城市/位置", "hero.facts.0.text")}
-            ${field("邮箱", "hero.facts.1.text")}
-            ${field("个人网站", "hero.facts.2.text")}
-          </div>
-        `,
-      )}
-      ${renderDetails()}
-      ${renderSkills()}
-      ${renderExperience()}
-      ${renderProjects()}
-      ${renderContactLinks()}
-    </form>
+    ${renderVisualEditor()}
+
+    <details class="form-details">
+      <summary>Detailed form</summary>
+      <form class="profile-form" data-profile-form>
+        ${section(
+          "首页与基础信息",
+          `
+            <div class="admin-form-grid">
+              ${field("浏览器标题", "site.title")}
+              ${field("页脚文字", "site.footer")}
+              ${field("品牌左半部分", "hero.brandFirst")}
+              ${field("品牌强调部分", "hero.brandAccent")}
+              ${field("首页姓名", "hero.name")}
+              ${field("作品集标题", "hero.portfolioTitle")}
+              ${field("一句话定位", "hero.headline")}
+              ${field("头像路径", "hero.image")}
+              ${field("简历下载链接", "hero.resumeUrl")}
+            </div>
+            ${field("个人简介", "hero.summary", { textarea: true, rows: 4 })}
+          `,
+        )}
+      </form>
+    </details>
 
     <details class="json-details">
       <summary>Advanced JSON</summary>
@@ -352,42 +535,44 @@ function collectProfileFromForm() {
   const next = clone(currentProfile);
 
   editorMount.querySelectorAll("[data-path]").forEach((input) => {
-    setValue(input.dataset.path, input.value, next);
+    const closedDetails = input.closest("details:not([open])");
+    if (closedDetails) return;
+    setValue(input.dataset.path, readValue(input), next);
   });
 
   next.details.items = [...editorMount.querySelectorAll("[data-detail-row]")].map((row) => ({
-    label: row.querySelector("[data-detail-label]").value,
-    value: row.querySelector("[data-detail-value]").value,
+    label: readValue(row.querySelector("[data-detail-label]")),
+    value: readValue(row.querySelector("[data-detail-value]")),
   }));
 
   next.skills.groups = [...editorMount.querySelectorAll("[data-skill-group]")].map((group) => ({
-    icon: group.querySelector("[data-skill-icon]").value,
-    title: group.querySelector("[data-skill-title]").value,
+    icon: readValue(group.querySelector("[data-skill-icon]")),
+    title: readValue(group.querySelector("[data-skill-title]")),
     items: [...group.querySelectorAll("[data-skill-item]")].map((item) => ({
-      label: item.querySelector("[data-skill-label]").value,
-      level: Math.max(0, Math.min(100, Number(item.querySelector("[data-skill-level]").value) || 0)),
+      label: readValue(item.querySelector("[data-skill-label]")),
+      level: Math.max(0, Math.min(100, Number(readValue(item.querySelector("[data-skill-level]"))) || 0)),
     })),
   }));
 
   next.experience.items = [...editorMount.querySelectorAll("[data-experience-row]")].map((row) => ({
-    period: row.querySelector("[data-experience-period]").value,
-    role: row.querySelector("[data-experience-role]").value,
-    company: row.querySelector("[data-experience-company]").value,
-    description: row.querySelector("[data-experience-description]").value,
+    period: readValue(row.querySelector("[data-experience-period]")),
+    role: readValue(row.querySelector("[data-experience-role]")),
+    company: readValue(row.querySelector("[data-experience-company]")),
+    description: readValue(row.querySelector("[data-experience-description]")),
   }));
 
   next.projects.items = [...editorMount.querySelectorAll("[data-project-row]")].map((row) => ({
-    title: row.querySelector("[data-project-title]").value,
-    description: row.querySelector("[data-project-description]").value,
-    image: row.querySelector("[data-project-image]").value,
-    imageAlt: row.querySelector("[data-project-alt]").value,
-    caseStudyUrl: row.querySelector("[data-project-case]").value,
-    demoUrl: row.querySelector("[data-project-demo]").value,
+    title: readValue(row.querySelector("[data-project-title]")),
+    description: readValue(row.querySelector("[data-project-description]")),
+    image: readValue(row.querySelector("[data-project-image]")),
+    imageAlt: readValue(row.querySelector("[data-project-alt]")),
+    caseStudyUrl: readValue(row.querySelector("[data-project-case]")),
+    demoUrl: readValue(row.querySelector("[data-project-demo]")),
   }));
 
   next.contact.links = [...editorMount.querySelectorAll("[data-link-row]")].map((row) => ({
-    label: row.querySelector("[data-link-label]").value,
-    url: row.querySelector("[data-link-url]").value,
+    label: readValue(row.querySelector("[data-link-label]")),
+    url: readValue(row.querySelector("[data-link-url]")),
   }));
 
   return next;
@@ -599,6 +784,11 @@ editor?.addEventListener("click", async (event) => {
 
   if (button.matches("[data-toggle-json]")) {
     const details = editorMount.querySelector(".json-details");
+    if (details) details.open = !details.open;
+  }
+
+  if (button.matches("[data-toggle-form]")) {
+    const details = editorMount.querySelector(".form-details");
     if (details) details.open = !details.open;
   }
 
