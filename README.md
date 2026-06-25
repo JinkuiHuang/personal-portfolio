@@ -50,14 +50,19 @@ SQL 已配置后台登录邮箱：`jacksonhuang.hjk@qq.com`。
 
 ### 4. 创建后台登录账号
 
-进入 Supabase `Authentication` → `Users`，创建一个用户：
+打开后台：
 
-- Email：和 SQL 中配置的邮箱一致
-- Password：你自己的后台密码
+```text
+https://jinkuihuang.github.io/personal-portfolio/admin/
+```
+
+输入邮箱 `jacksonhuang.hjk@qq.com` 和你要设置的密码，然后点击 `Create account`。
+
+如果 Supabase 要求邮箱确认，到邮箱里点击确认链接，再回到后台登录。
 
 ### 5. 打开后台
 
-部署后访问：
+之后访问：
 
 ```text
 https://jinkuihuang.github.io/personal-portfolio/admin/

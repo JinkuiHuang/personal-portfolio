@@ -9,6 +9,7 @@ const signOutButton = document.querySelector("[data-sign-out]");
 const saveButton = document.querySelector("[data-save-profile]");
 const formatButton = document.querySelector("[data-format-json]");
 const loadDefaultButton = document.querySelector("[data-load-default]");
+const signUpButton = document.querySelector("[data-sign-up]");
 
 const profileId = config.profileId || "main";
 let supabase = null;
@@ -120,6 +121,35 @@ loginForm?.addEventListener("submit", async (event) => {
   setStatus(loginStatus, "");
   showEditor();
   await loadProfile();
+});
+
+signUpButton?.addEventListener("click", async () => {
+  setStatus(loginStatus, "Creating account...");
+
+  const formData = new FormData(loginForm);
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  if (!email || !password) {
+    setStatus(loginStatus, "请输入邮箱和密码后再创建账号。", true);
+    return;
+  }
+
+  const { data, error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    setStatus(loginStatus, `创建失败：${error.message}`, true);
+    return;
+  }
+
+  if (data.session) {
+    setStatus(loginStatus, "");
+    showEditor();
+    await loadProfile();
+    return;
+  }
+
+  setStatus(loginStatus, "账号已创建。请到邮箱中点击 Supabase 确认链接，然后回来登录。");
 });
 
 signOutButton?.addEventListener("click", async () => {

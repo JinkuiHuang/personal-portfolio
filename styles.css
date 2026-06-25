@@ -669,6 +669,12 @@ textarea {
   margin-top: 34px;
 }
 
+.admin-login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .admin-login label {
   display: grid;
   gap: 8px;
