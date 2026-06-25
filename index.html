@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="一个可部署到互联网的个人资料与作品集网页模板。"
+    />
+    <title>Alex Chen | Personal Portfolio</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23087982'/%3E%3Cpath d='M8 22 15.7 7h2.7L26 22h-3.2l-1.5-3.2h-8.7L11.1 22H8Zm5.7-5.7h6.5L17 9.7l-3.3 6.6Z' fill='white'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header" data-header>
+      <a class="brand" href="#profile" aria-label="回到首页">
+        Alex <span>Chen</span>
+      </a>
+
+      <nav class="site-nav" aria-label="主导航" data-nav>
+        <a class="active" href="#profile">Profile</a>
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">
+          <span aria-hidden="true">☼</span>
+        </button>
+        <button class="menu-button" type="button" data-menu-toggle aria-label="打开导航">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero section" id="profile">
+        <div class="hero-copy">
+          <h1>Alex Chen</h1>
+          <p class="portfolio-title">Personal Portfolio</p>
+          <span class="rule"></span>
+          <h2>Product-minded builder</h2>
+          <p>
+            I design and build thoughtful digital products that solve real problems. With a
+            background in product and engineering, I enjoy turning ideas into scalable,
+            user-friendly experiences.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="./assets/design-concept.png" download>
+              <span aria-hidden="true">↓</span>
+              Download Résumé
+            </a>
+            <a class="button secondary" href="#projects">
+              <span aria-hidden="true">□</span>
+              View My Work
+            </a>
+          </div>
+          <ul class="quick-facts" aria-label="快速联系方式">
+            <li>
+              <span aria-hidden="true">⌖</span>
+              San Francisco, CA
+            </li>
+            <li>
+              <span aria-hidden="true">✉</span>
+              alex.chen@email.com
+            </li>
+            <li>
+              <span aria-hidden="true">◎</span>
+              alexchen.dev
+            </li>
+          </ul>
+        </div>
+        <figure class="hero-media">
+          <img src="./assets/profile.png" alt="Alex Chen 的个人头像" />
+        </figure>
+      </section>
+
+      <section class="info-grid section" id="about">
+        <div class="details-block">
+          <div class="section-heading">
+            <h2>Personal Details</h2>
+            <span class="rule small"></span>
+          </div>
+          <dl class="detail-list">
+            <div>
+              <dt>Full Name</dt>
+              <dd>Alex Chen</dd>
+            </div>
+            <div>
+              <dt>Pronouns</dt>
+              <dd>He / Him</dd>
+            </div>
+            <div>
+              <dt>Date of Birth</dt>
+              <dd>May 14, 1993</dd>
+            </div>
+            <div>
+              <dt>Nationality</dt>
+              <dd>Canadian</dd>
+            </div>
+            <div>
+              <dt>Languages</dt>
+              <dd>English, Mandarin</dd>
+            </div>
+            <div>
+              <dt>Education</dt>
+              <dd>B.Sc. Computer Science<br />University of Toronto</dd>
+            </div>
+            <div>
+              <dt>Availability</dt>
+              <dd>Open to opportunities</dd>
+            </div>
+          </dl>
+          <a class="text-link" href="#contact">More about me <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="skills-block">
+          <div class="section-heading">
+            <h2>Skills</h2>
+            <span class="rule small"></span>
+          </div>
+
+          <article class="skill-group">
+            <div>
+              <span class="skill-icon" aria-hidden="true">⬢</span>
+              <h3>Product</h3>
+              <p>Product Strategy</p>
+              <p>User Research</p>
+              <p>Roadmapping</p>
+              <p>Analytics</p>
+            </div>
+            <div class="meters" aria-label="Product skill levels">
+              <span style="--level: 76%"></span>
+              <span style="--level: 60%"></span>
+              <span style="--level: 46%"></span>
+              <span style="--level: 60%"></span>
+            </div>
+          </article>
+
+          <article class="skill-group">
+            <div>
+              <span class="skill-icon" aria-hidden="true">◇</span>
+              <h3>Design</h3>
+              <p>UI/UX Design</p>
+              <p>Interaction Design</p>
+              <p>Prototyping</p>
+              <p>Design Systems</p>
+            </div>
+            <div class="meters" aria-label="Design skill levels">
+              <span style="--level: 66%"></span>
+              <span style="--level: 60%"></span>
+              <span style="--level: 46%"></span>
+              <span style="--level: 80%"></span>
+            </div>
+          </article>
+
+          <article class="skill-group">
+            <div>
+              <span class="skill-icon" aria-hidden="true">&lt;/&gt;</span>
+              <h3>Engineering</h3>
+              <p>JavaScript / TypeScript</p>
+              <p>React</p>
+              <p>Node.js</p>
+              <p>SQL / NoSQL</p>
+            </div>
+            <div class="meters" aria-label="Engineering skill levels">
+              <span style="--level: 68%"></span>
+              <span style="--level: 74%"></span>
+              <span style="--level: 48%"></span>
+              <span style="--level: 62%"></span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section timeline-section" id="experience">
+        <div class="section-heading">
+          <h2>Experience</h2>
+          <span class="rule small"></span>
+        </div>
+        <div class="timeline">
+          <article>
+            <time>2021 – Present</time>
+            <div class="timeline-dot"></div>
+            <div>
+              <h3>Senior Product Engineer</h3>
+              <p class="company">Finch Technologies, San Francisco, CA</p>
+              <p>
+                Leading cross-functional teams to build scalable fintech products. Shipped
+                features that improved activation by 35% and reduced churn by 18%.
+              </p>
+            </div>
+          </article>
+          <article>
+            <time>2018 – 2021</time>
+            <div class="timeline-dot"></div>
+            <div>
+              <h3>Product Engineer</h3>
+              <p class="company">Brightly, Toronto, Canada</p>
+              <p>
+                Built and iterated on core product features used by thousands daily.
+                Collaborated closely with designers and PMs to ship user-centric solutions.
+              </p>
+            </div>
+          </article>
+          <article>
+            <time>2016 – 2018</time>
+            <div class="timeline-dot"></div>
+            <div>
+              <h3>Software Developer</h3>
+              <p class="company">Rivet Systems, Toronto, Canada</p>
+              <p>
+                Developed full-stack web applications and internal tools. Improved
+                performance and reliability across key platforms.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section projects-section" id="projects">
+        <div class="section-heading">
+          <h2>Selected Work</h2>
+          <span class="rule small"></span>
+        </div>
+        <div class="project-grid">
+          <article class="project-card">
+            <img src="./assets/project-fintech.png" alt="Finch Dashboard 项目界面" />
+            <h3>Finch Dashboard</h3>
+            <p>Analytics dashboard for modern banking teams with reports and alerts.</p>
+            <div class="project-links">
+              <a href="#">View Case Study <span aria-hidden="true">→</span></a>
+              <a href="#">Live Demo <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+          <article class="project-card">
+            <img src="./assets/project-taskflow.png" alt="TaskFlow 项目界面" />
+            <h3>TaskFlow</h3>
+            <p>Project management tool for agile teams, timelines, and workloads.</p>
+            <div class="project-links">
+              <a href="#">View Case Study <span aria-hidden="true">→</span></a>
+              <a href="#">Live Demo <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+          <article class="project-card">
+            <img src="./assets/project-studio.png" alt="Studio Store 项目界面" />
+            <h3>Studio Store</h3>
+            <p>E-commerce experience focused on simplicity and conversion.</p>
+            <div class="project-links">
+              <a href="#">View Case Study <span aria-hidden="true">→</span></a>
+              <a href="#">Live Demo <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+        </div>
+        <a class="center-link" href="#contact">See more projects <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="section contact-section" id="contact">
+        <div class="contact-copy">
+          <div class="section-heading">
+            <h2>Let’s work together</h2>
+            <span class="rule small"></span>
+          </div>
+          <p>
+            I’m currently open to new opportunities and interesting projects. Whether you
+            have a question or just want to say hi, I’d love to hear from you.
+          </p>
+          <form class="contact-form" data-contact-form>
+            <label>
+              <span>Your email</span>
+              <input type="email" name="email" placeholder="you@example.com" required />
+            </label>
+            <label>
+              <span>Message</span>
+              <textarea name="message" rows="4" placeholder="Tell me what you are building" required></textarea>
+            </label>
+            <button class="button primary" type="submit">
+              <span aria-hidden="true">✉</span>
+              Send a Message
+            </button>
+            <p class="form-status" data-form-status role="status"></p>
+          </form>
+        </div>
+        <aside class="connect-list" aria-label="社交链接">
+          <div class="section-heading">
+            <h2>Connect</h2>
+            <span class="rule small"></span>
+          </div>
+          <a href="#">github.com/alexchen</a>
+          <a href="#">linkedin.com/in/alexchen</a>
+          <a href="#">twitter.com/alexchen_dev</a>
+          <a href="#">dribbble.com/alexchen</a>
+          <a href="mailto:alex.chen@email.com">alex.chen@email.com</a>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 Alex Chen. All rights reserved.</p>
+      <nav aria-label="页脚导航">
+        <a href="#profile">Profile</a>
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="back-top" href="#profile" aria-label="回到顶部">↑</a>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
