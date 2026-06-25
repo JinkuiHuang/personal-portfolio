@@ -10,6 +10,7 @@ const saveButton = document.querySelector("[data-save-profile]");
 const formatButton = document.querySelector("[data-format-json]");
 const loadDefaultButton = document.querySelector("[data-load-default]");
 const signUpButton = document.querySelector("[data-sign-up]");
+const resendConfirmationButton = document.querySelector("[data-resend-confirmation]");
 
 const profileId = config.profileId || "main";
 let supabase = null;
@@ -156,6 +157,33 @@ signUpButton?.addEventListener("click", async () => {
   }
 
   setStatus(loginStatus, "账号已创建。请到邮箱中点击 Supabase 确认链接，然后回来登录。");
+});
+
+resendConfirmationButton?.addEventListener("click", async () => {
+  const formData = new FormData(loginForm);
+  const email = formData.get("email");
+
+  if (!email) {
+    setStatus(loginStatus, "请输入邮箱后再重发确认邮件。", true);
+    return;
+  }
+
+  setStatus(loginStatus, "Sending confirmation email...");
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: new URL("./", window.location.href).toString(),
+    },
+  });
+
+  if (error) {
+    setStatus(loginStatus, `重发失败：${error.message}`, true);
+    return;
+  }
+
+  setStatus(loginStatus, "确认邮件已重新发送。请到邮箱点击最新的确认链接。");
 });
 
 signOutButton?.addEventListener("click", async () => {
