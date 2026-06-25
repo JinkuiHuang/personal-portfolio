@@ -47,18 +47,7 @@
         </form>
 
         <section class="admin-editor" data-editor hidden>
-          <div class="editor-toolbar">
-            <div>
-              <h2>Profile JSON</h2>
-              <p>修改后点击保存。JSON 格式错误时不会写入数据库。</p>
-            </div>
-            <div class="editor-actions">
-              <button class="button secondary" type="button" data-load-default>Load local default</button>
-              <button class="button secondary" type="button" data-format-json>Format JSON</button>
-              <button class="button primary" type="button" data-save-profile>Save to database</button>
-            </div>
-          </div>
-          <textarea class="json-editor" data-json-editor spellcheck="false"></textarea>
+          <div data-editor-mount></div>
           <p class="form-status" data-editor-status role="status"></p>
         </section>
       </section>

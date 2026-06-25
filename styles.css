@@ -717,6 +717,142 @@ textarea {
   resize: vertical;
 }
 
+.profile-form {
+  display: grid;
+  gap: 22px;
+}
+
+.admin-card,
+.admin-nested-card,
+.json-details {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--bg));
+}
+
+.admin-card {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.admin-card-heading h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.admin-form-grid,
+.admin-inline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-field,
+.admin-list-item label,
+.admin-inline-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 720;
+}
+
+.admin-field small {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.admin-field input,
+.admin-field textarea,
+.admin-list-item input,
+.admin-list-item textarea,
+.admin-inline-grid input {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  padding: 12px 13px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.admin-field textarea,
+.admin-list-item textarea {
+  resize: vertical;
+}
+
+.admin-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-list-item,
+.admin-nested-card {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.admin-list-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.experience-row,
+.project-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.experience-row label:last-of-type,
+.project-row label:nth-of-type(2) {
+  grid-column: 1 / -1;
+}
+
+.link-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  align-items: end;
+}
+
+.skill-row {
+  margin-top: 12px;
+  grid-template-columns: minmax(0, 1fr) 180px auto;
+  align-items: end;
+}
+
+.admin-nested-card > .admin-inline-grid:first-child {
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.button.compact {
+  min-height: 42px;
+  width: fit-content;
+  padding: 0 16px;
+}
+
+.icon-button.danger {
+  align-self: end;
+  background: color-mix(in srgb, #b42318 8%, transparent);
+  color: #b42318;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.json-details {
+  padding: 16px;
+}
+
+.json-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 780;
+}
+
+.json-details .json-editor {
+  margin: 14px 0;
+}
+
 .form-status.error {
   color: #b42318;
 }
@@ -789,6 +925,16 @@ textarea {
 
   .editor-actions {
     justify-content: flex-start;
+  }
+
+  .admin-form-grid,
+  .admin-inline-grid,
+  .experience-row,
+  .project-row,
+  .link-row,
+  .skill-row,
+  .admin-nested-card > .admin-inline-grid:first-child {
+    grid-template-columns: 1fr;
   }
 }
 
