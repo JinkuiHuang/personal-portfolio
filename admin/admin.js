@@ -135,7 +135,13 @@ signUpButton?.addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: new URL("./", window.location.href).toString(),
+    },
+  });
 
   if (error) {
     setStatus(loginStatus, `创建失败：${error.message}`, true);

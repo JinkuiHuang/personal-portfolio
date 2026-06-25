@@ -50,6 +50,11 @@ SQL 已配置后台登录邮箱：`jacksonhuang.hjk@qq.com`。
 
 ### 4. 创建后台登录账号
 
+先在 Supabase 控制台进入 `Authentication` → `URL Configuration`：
+
+- `Site URL` 填：`https://jinkuihuang.github.io/personal-portfolio/`
+- `Redirect URLs` 添加：`https://jinkuihuang.github.io/personal-portfolio/admin/`
+
 打开后台：
 
 ```text
