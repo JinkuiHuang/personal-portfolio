@@ -36,7 +36,7 @@ python3 -m http.server 5173
 
 ```js
 window.PORTFOLIO_SUPABASE = {
-  url: "你的 Supabase Project URL",
+  url: "https://dqqgtzzfqrqyrosifchs.supabase.co",
   anonKey: "你的 anon public key",
   profileId: "main"
 };
@@ -46,13 +46,7 @@ window.PORTFOLIO_SUPABASE = {
 
 打开 Supabase 的 `SQL Editor`，复制 `supabase/schema.sql` 内容执行。
 
-执行前把 SQL 里的：
-
-```sql
-your-email@example.com
-```
-
-替换成你要用来登录后台的邮箱。
+SQL 已配置后台登录邮箱：`jacksonhuang.hjk@qq.com`。
 
 ### 4. 创建后台登录账号
 

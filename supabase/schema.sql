@@ -18,7 +18,7 @@ create policy "Only owner can insert portfolio profiles"
 on public.portfolio_profiles
 for insert
 with check (
-  auth.jwt() ->> 'email' = 'your-email@example.com'
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
 );
 
 drop policy if exists "Only owner can update portfolio profiles" on public.portfolio_profiles;
@@ -26,10 +26,10 @@ create policy "Only owner can update portfolio profiles"
 on public.portfolio_profiles
 for update
 using (
-  auth.jwt() ->> 'email' = 'your-email@example.com'
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
 )
 with check (
-  auth.jwt() ->> 'email' = 'your-email@example.com'
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
 );
 
 create or replace function public.set_portfolio_updated_at()
