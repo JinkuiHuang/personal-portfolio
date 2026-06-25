@@ -1,0 +1,148 @@
+{
+  "site": {
+    "title": "Alex Chen | Personal Portfolio",
+    "description": "一个可部署到互联网的个人资料与作品集网页模板。",
+    "footer": "© 2026 Alex Chen. All rights reserved."
+  },
+  "nav": [
+    { "label": "Profile", "href": "#profile" },
+    { "label": "About", "href": "#about" },
+    { "label": "Experience", "href": "#experience" },
+    { "label": "Projects", "href": "#projects" },
+    { "label": "Contact", "href": "#contact" }
+  ],
+  "hero": {
+    "brandFirst": "Alex",
+    "brandAccent": "Chen",
+    "name": "Alex Chen",
+    "portfolioTitle": "Personal Portfolio",
+    "headline": "Product-minded builder",
+    "summary": "I design and build thoughtful digital products that solve real problems. With a background in product and engineering, I enjoy turning ideas into scalable, user-friendly experiences.",
+    "resumeLabel": "Download Résumé",
+    "resumeUrl": "./assets/design-concept.png",
+    "workLabel": "View My Work",
+    "image": "./assets/profile.png",
+    "imageAlt": "Alex Chen 的个人头像",
+    "facts": [
+      { "icon": "⌖", "text": "San Francisco, CA" },
+      { "icon": "✉", "text": "alex.chen@email.com" },
+      { "icon": "◎", "text": "alexchen.dev" }
+    ]
+  },
+  "details": {
+    "heading": "Personal Details",
+    "moreLabel": "More about me",
+    "items": [
+      { "label": "Full Name", "value": "Alex Chen" },
+      { "label": "Pronouns", "value": "He / Him" },
+      { "label": "Date of Birth", "value": "May 14, 1993" },
+      { "label": "Nationality", "value": "Canadian" },
+      { "label": "Languages", "value": "English, Mandarin" },
+      { "label": "Education", "value": "B.Sc. Computer Science\nUniversity of Toronto" },
+      { "label": "Availability", "value": "Open to opportunities" }
+    ]
+  },
+  "skills": {
+    "heading": "Skills",
+    "groups": [
+      {
+        "icon": "⬢",
+        "title": "Product",
+        "items": [
+          { "label": "Product Strategy", "level": 76 },
+          { "label": "User Research", "level": 60 },
+          { "label": "Roadmapping", "level": 46 },
+          { "label": "Analytics", "level": 60 }
+        ]
+      },
+      {
+        "icon": "◇",
+        "title": "Design",
+        "items": [
+          { "label": "UI/UX Design", "level": 66 },
+          { "label": "Interaction Design", "level": 60 },
+          { "label": "Prototyping", "level": 46 },
+          { "label": "Design Systems", "level": 80 }
+        ]
+      },
+      {
+        "icon": "</>",
+        "title": "Engineering",
+        "items": [
+          { "label": "JavaScript / TypeScript", "level": 68 },
+          { "label": "React", "level": 74 },
+          { "label": "Node.js", "level": 48 },
+          { "label": "SQL / NoSQL", "level": 62 }
+        ]
+      }
+    ]
+  },
+  "experience": {
+    "heading": "Experience",
+    "items": [
+      {
+        "period": "2021 – Present",
+        "role": "Senior Product Engineer",
+        "company": "Finch Technologies, San Francisco, CA",
+        "description": "Leading cross-functional teams to build scalable fintech products. Shipped features that improved activation by 35% and reduced churn by 18%."
+      },
+      {
+        "period": "2018 – 2021",
+        "role": "Product Engineer",
+        "company": "Brightly, Toronto, Canada",
+        "description": "Built and iterated on core product features used by thousands daily. Collaborated closely with designers and PMs to ship user-centric solutions."
+      },
+      {
+        "period": "2016 – 2018",
+        "role": "Software Developer",
+        "company": "Rivet Systems, Toronto, Canada",
+        "description": "Developed full-stack web applications and internal tools. Improved performance and reliability across key platforms."
+      }
+    ]
+  },
+  "projects": {
+    "heading": "Selected Work",
+    "moreLabel": "See more projects",
+    "items": [
+      {
+        "title": "Finch Dashboard",
+        "description": "Analytics dashboard for modern banking teams with reports and alerts.",
+        "image": "./assets/project-fintech.png",
+        "imageAlt": "Finch Dashboard 项目界面",
+        "caseStudyUrl": "#",
+        "demoUrl": "#"
+      },
+      {
+        "title": "TaskFlow",
+        "description": "Project management tool for agile teams, timelines, and workloads.",
+        "image": "./assets/project-taskflow.png",
+        "imageAlt": "TaskFlow 项目界面",
+        "caseStudyUrl": "#",
+        "demoUrl": "#"
+      },
+      {
+        "title": "Studio Store",
+        "description": "E-commerce experience focused on simplicity and conversion.",
+        "image": "./assets/project-studio.png",
+        "imageAlt": "Studio Store 项目界面",
+        "caseStudyUrl": "#",
+        "demoUrl": "#"
+      }
+    ]
+  },
+  "contact": {
+    "heading": "Let’s work together",
+    "body": "I’m currently open to new opportunities and interesting projects. Whether you have a question or just want to say hi, I’d love to hear from you.",
+    "emailPlaceholder": "you@example.com",
+    "messagePlaceholder": "Tell me what you are building",
+    "buttonLabel": "Send a Message",
+    "connectHeading": "Connect",
+    "links": [
+      { "label": "github.com/alexchen", "url": "#" },
+      { "label": "linkedin.com/in/alexchen", "url": "#" },
+      { "label": "twitter.com/alexchen_dev", "url": "#" },
+      { "label": "dribbble.com/alexchen", "url": "#" },
+      { "label": "alex.chen@email.com", "url": "mailto:alex.chen@email.com" }
+    ]
+  }
+}
