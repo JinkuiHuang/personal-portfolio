@@ -840,6 +840,11 @@ function renderForm() {
           hasDraft ? "" : "hidden"
         }>丢弃草稿</button>
         <button class="button secondary" type="button" data-load-default>载入默认资料</button>
+        <button class="button secondary" type="button" data-download-backup>下载备份</button>
+        <label class="button secondary backup-upload">
+          恢复备份
+          <input type="file" accept="application/json,.json" data-backup-upload />
+        </label>
         <button class="button secondary" type="button" data-toggle-form>详细表单</button>
         <button class="button secondary" type="button" data-toggle-json>Advanced JSON</button>
         <button class="button primary" type="button" data-save-profile>保存到数据库</button>
@@ -1318,6 +1323,63 @@ function discardDraft() {
   setEditorStatus("本机草稿已丢弃，当前页面内容未改变。");
 }
 
+function downloadBackup() {
+  const profile = collectProfileFromForm();
+  const name = String(profile.hero?.name || profileId || "portfolio")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const date = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([JSON.stringify(profile, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `${name || "portfolio"}-backup-${date}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  setEditorStatus("备份已下载到浏览器默认下载文件夹。");
+}
+
+function isValidProfileBackup(profile) {
+  return Boolean(
+    profile &&
+      typeof profile === "object" &&
+      profile.site &&
+      profile.hero &&
+      profile.details &&
+      profile.skills &&
+      profile.experience &&
+      profile.projects &&
+      profile.contact,
+  );
+}
+
+async function restoreBackupFile(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const profile = JSON.parse(text);
+
+    if (!isValidProfileBackup(profile)) {
+      throw new Error("这个文件不像本网页的资料备份。");
+    }
+
+    currentProfile = clone(profile);
+    writeDraft(currentProfile);
+    renderForm();
+    markDirty("备份已恢复为草稿。确认无误后点击保存到数据库。");
+  } catch (error) {
+    setEditorStatus(`恢复备份失败：${error.message}`, true);
+  } finally {
+    input.value = "";
+  }
+}
+
 async function init() {
   await loadLocalDefault();
 
@@ -1450,6 +1512,10 @@ editor?.addEventListener("click", async (event) => {
     markDirty("已载入本地默认资料，保存后会覆盖数据库当前内容。");
   }
 
+  if (button.matches("[data-download-backup]")) {
+    downloadBackup();
+  }
+
   if (button.matches("[data-restore-draft]")) {
     restoreDraft();
   }
@@ -1526,6 +1592,12 @@ editor?.addEventListener("change", async (event) => {
   const fileInput = event.target.closest("[data-file-upload]");
   if (fileInput) {
     await uploadSelectedFile(fileInput);
+    return;
+  }
+
+  const backupInput = event.target.closest("[data-backup-upload]");
+  if (backupInput) {
+    await restoreBackupFile(backupInput);
   }
 });
 

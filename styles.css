@@ -898,6 +898,18 @@ textarea {
   pointer-events: none;
 }
 
+.backup-upload {
+  cursor: pointer;
+}
+
+.backup-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .visual-remove {
   width: fit-content;
   min-height: 30px;
