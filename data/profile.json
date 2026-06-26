@@ -2,7 +2,13 @@
   "site": {
     "title": "Alex Chen | Personal Portfolio",
     "description": "一个可部署到互联网的个人资料与作品集网页模板。",
-    "footer": "© 2026 Alex Chen. All rights reserved."
+    "footer": "© 2026 Alex Chen. All rights reserved.",
+    "colors": {
+      "accent": "#087982",
+      "accentDark": "#05606a",
+      "accentSoft": "#e5f4f3",
+      "warm": "#e9a11a"
+    }
   },
   "nav": [
     { "label": "Profile", "href": "#profile" },

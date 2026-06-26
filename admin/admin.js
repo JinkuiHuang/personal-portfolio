@@ -425,6 +425,56 @@ function renderVisualEditor() {
         <span>直接点击页面里的文字修改。图片使用 Choose file 选择文件上传。</span>
       </div>
 
+      <section class="admin-card visual-site-card">
+        <div class="admin-card-heading">
+          <h3>站点外观</h3>
+        </div>
+        <div class="visual-site-grid">
+          <label>
+            <span>浏览器标题</span>
+            <input data-path="site.title" value="${escapeHtml(currentProfile.site?.title)}" />
+          </label>
+          <label>
+            <span>页脚文字</span>
+            <input data-path="site.footer" value="${escapeHtml(currentProfile.site?.footer)}" />
+          </label>
+          <label>
+            <span>品牌左半部分</span>
+            <input data-path="hero.brandFirst" value="${escapeHtml(currentProfile.hero?.brandFirst)}" />
+          </label>
+          <label>
+            <span>品牌强调部分</span>
+            <input data-path="hero.brandAccent" value="${escapeHtml(currentProfile.hero?.brandAccent)}" />
+          </label>
+        </div>
+        <div class="visual-color-grid">
+          <label>
+            <span>主色</span>
+            <input type="color" data-path="site.colors.accent" value="${escapeHtml(
+              currentProfile.site?.colors?.accent || "#087982",
+            )}" />
+          </label>
+          <label>
+            <span>深主色</span>
+            <input type="color" data-path="site.colors.accentDark" value="${escapeHtml(
+              currentProfile.site?.colors?.accentDark || "#05606a",
+            )}" />
+          </label>
+          <label>
+            <span>浅底色</span>
+            <input type="color" data-path="site.colors.accentSoft" value="${escapeHtml(
+              currentProfile.site?.colors?.accentSoft || "#e5f4f3",
+            )}" />
+          </label>
+          <label>
+            <span>强调线</span>
+            <input type="color" data-path="site.colors.warm" value="${escapeHtml(
+              currentProfile.site?.colors?.warm || "#e9a11a",
+            )}" />
+          </label>
+        </div>
+      </section>
+
       <section class="admin-card visual-nav-card">
         <div class="admin-card-heading">
           <h3>导航菜单</h3>
@@ -800,6 +850,10 @@ function renderForm() {
               ${field("项目更多链接文字", "projects.moreLabel")}
               ${field("项目案例按钮文字", "projects.caseStudyLabel")}
               ${field("项目演示按钮文字", "projects.demoLabel")}
+              ${field("主色", "site.colors.accent", { type: "color" })}
+              ${field("深主色", "site.colors.accentDark", { type: "color" })}
+              ${field("浅底色", "site.colors.accentSoft", { type: "color" })}
+              ${field("强调线", "site.colors.warm", { type: "color" })}
             </div>
             ${field("个人简介", "hero.summary", { textarea: true, rows: 4 })}
           `,

@@ -97,12 +97,24 @@ function sectionHeading(title) {
   `;
 }
 
+function applyColorSetting(name, value) {
+  const text = String(value || "").trim();
+  if (/^#[0-9a-f]{6}$/i.test(text)) {
+    root.style.setProperty(name, text);
+  }
+}
+
 function renderProfile(profile) {
   document.title = profile.site?.title || profile.hero?.name || "Personal Portfolio";
   const metaDescription = document.querySelector('meta[name="description"]');
   if (metaDescription && profile.site?.description) {
     metaDescription.setAttribute("content", profile.site.description);
   }
+
+  applyColorSetting("--accent", profile.site?.colors?.accent);
+  applyColorSetting("--accent-dark", profile.site?.colors?.accentDark);
+  applyColorSetting("--accent-soft", profile.site?.colors?.accentSoft);
+  applyColorSetting("--warm", profile.site?.colors?.warm);
 
   const brand = document.querySelector(".brand");
   if (brand) {
