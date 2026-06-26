@@ -92,3 +92,51 @@ using (
   bucket_id = 'portfolio-assets'
   and auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
 );
+
+create table if not exists public.portfolio_messages (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  message text not null,
+  page_url text,
+  user_agent text,
+  is_read boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.portfolio_messages enable row level security;
+
+drop policy if exists "Anyone can leave a portfolio message" on public.portfolio_messages;
+create policy "Anyone can leave a portfolio message"
+on public.portfolio_messages
+for insert
+with check (
+  char_length(trim(email)) between 3 and 320
+  and char_length(trim(message)) between 1 and 4000
+);
+
+drop policy if exists "Only owner can read portfolio messages" on public.portfolio_messages;
+create policy "Only owner can read portfolio messages"
+on public.portfolio_messages
+for select
+using (
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+);
+
+drop policy if exists "Only owner can update portfolio messages" on public.portfolio_messages;
+create policy "Only owner can update portfolio messages"
+on public.portfolio_messages
+for update
+using (
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+)
+with check (
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+);
+
+drop policy if exists "Only owner can delete portfolio messages" on public.portfolio_messages;
+create policy "Only owner can delete portfolio messages"
+on public.portfolio_messages
+for delete
+using (
+  auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+);

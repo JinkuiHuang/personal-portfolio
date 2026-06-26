@@ -13,6 +13,9 @@ const profileId = config.profileId || "main";
 let supabase = null;
 let localDefault = null;
 let currentProfile = null;
+let contactMessages = [];
+let messagesLoadError = "";
+let isDirty = false;
 
 function hasConfig() {
   return Boolean(config.url && config.anonKey);
@@ -34,6 +37,26 @@ function escapeHtml(value = "") {
 function setStatus(element, message, isError = false) {
   element.textContent = message;
   element.classList.toggle("error", isError);
+}
+
+function setEditorStatus(message, isError = false) {
+  setStatus(editorStatus, message, isError);
+  const saveState = editorMount?.querySelector("[data-save-state]");
+  if (!saveState) return;
+
+  saveState.textContent = isDirty ? "有未保存修改" : "已同步";
+  saveState.classList.toggle("dirty", isDirty);
+  saveState.classList.toggle("error", isError);
+}
+
+function markDirty(message = "有未保存修改，点击 Save to database 后才会发布。") {
+  isDirty = true;
+  setEditorStatus(message);
+}
+
+function clearDirty(message = "已保存。公开页面刷新后会读取最新资料。") {
+  isDirty = false;
+  setEditorStatus(message);
 }
 
 function getValue(path, source = currentProfile) {
@@ -510,14 +533,52 @@ function renderVisualEditor() {
   `;
 }
 
+function renderMessagesPanel() {
+  const messageRows = contactMessages
+    .map(
+      (message) => `
+        <article class="message-item">
+          <div class="message-meta">
+            <strong>${escapeHtml(message.email)}</strong>
+            <time>${escapeHtml(new Date(message.created_at).toLocaleString())}</time>
+          </div>
+          <p>${escapeHtml(message.message)}</p>
+        </article>
+      `,
+    )
+    .join("");
+
+  return `
+    <section class="admin-card messages-card">
+      <div class="admin-card-heading split">
+        <div>
+          <h3>访客留言</h3>
+          <p>公开页面联系表单提交后，会出现在这里。</p>
+        </div>
+        <button class="button secondary compact" type="button" data-refresh-messages>刷新留言</button>
+      </div>
+      ${
+        messagesLoadError
+          ? `<p class="empty-state error">${escapeHtml(messagesLoadError)}</p>`
+          : messageRows || `<p class="empty-state">暂时还没有收到留言。</p>`
+      }
+    </section>
+  `;
+}
+
 function renderForm() {
   editorMount.innerHTML = `
     <div class="editor-toolbar">
       <div>
         <h2>Visual Editor</h2>
         <p>像正式页面一样直接编辑文字和图片。修改后点击保存，公开页面刷新后会看到最新资料。</p>
+        <span class="save-state ${isDirty ? "dirty" : ""}" data-save-state>${
+          isDirty ? "有未保存修改" : "已同步"
+        }</span>
       </div>
       <div class="editor-actions">
+        <a class="button secondary" href="../" target="_blank" rel="noreferrer">View public site</a>
+        <button class="button secondary" type="button" data-sync-identity>Sync identity</button>
         <button class="button secondary" type="button" data-load-default>Load local default</button>
         <button class="button secondary" type="button" data-toggle-form>Detailed form</button>
         <button class="button secondary" type="button" data-toggle-json>Advanced JSON</button>
@@ -526,6 +587,7 @@ function renderForm() {
     </div>
 
     ${renderVisualEditor()}
+    ${renderMessagesPanel()}
 
     <details class="form-details">
       <summary>Detailed form</summary>
@@ -607,6 +669,78 @@ function collectProfileFromForm() {
   return next;
 }
 
+async function loadMessages() {
+  contactMessages = [];
+  messagesLoadError = "";
+
+  if (!supabase) {
+    messagesLoadError = "配置并登录 Supabase 后，可在这里查看访客留言。";
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("portfolio_messages")
+    .select("id,email,message,created_at,is_read")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) {
+    messagesLoadError = "暂时无法读取留言。请先在 Supabase SQL Editor 运行新版 schema.sql。";
+    return;
+  }
+
+  contactMessages = data || [];
+}
+
+function syncIdentity() {
+  currentProfile = collectProfileFromForm();
+
+  const name = String(currentProfile.hero?.name || "").trim();
+  const emailFact = (currentProfile.hero?.facts || []).find((fact) => String(fact.text || "").includes("@"));
+  const email = String(emailFact?.text || "").trim();
+
+  currentProfile.site = currentProfile.site || {};
+  currentProfile.hero = currentProfile.hero || {};
+  currentProfile.details = currentProfile.details || { items: [] };
+  currentProfile.details.items = currentProfile.details.items || [];
+  currentProfile.contact = currentProfile.contact || { links: [] };
+  currentProfile.contact.links = currentProfile.contact.links || [];
+
+  if (name) {
+    const [firstName, ...rest] = name.split(/\s+/);
+    currentProfile.hero.brandFirst = firstName || name;
+    currentProfile.hero.brandAccent = rest.join(" ");
+    currentProfile.site.title = `${name} | Personal Portfolio`;
+    currentProfile.site.footer = `© 2026 ${name}. All rights reserved.`;
+
+    const fullNameItem = currentProfile.details.items.find((item) =>
+      /^(full name|姓名|名字|name)$/i.test(String(item.label || "").trim()),
+    );
+
+    if (fullNameItem) {
+      fullNameItem.value = name;
+    } else {
+      currentProfile.details.items.unshift({ label: "Full Name", value: name });
+    }
+  }
+
+  if (email) {
+    const emailLink = currentProfile.contact.links.find((link) =>
+      String(link.url || "").startsWith("mailto:") || String(link.label || "").includes("@"),
+    );
+
+    if (emailLink) {
+      emailLink.label = email;
+      emailLink.url = `mailto:${email}`;
+    } else {
+      currentProfile.contact.links.push({ label: email, url: `mailto:${email}` });
+    }
+  }
+
+  renderForm();
+  markDirty("已同步姓名、标题、页脚和邮箱链接。点击 Save to database 后发布。");
+}
+
 async function loadProfile() {
   const fallback = localDefault || (await loadLocalDefault());
   const { data, error } = await supabase
@@ -617,11 +751,18 @@ async function loadProfile() {
 
   if (error) throw error;
   currentProfile = clone(data?.content || fallback);
+  isDirty = false;
+  await loadMessages();
   renderForm();
 }
 
 async function saveProfile() {
   currentProfile = collectProfileFromForm();
+
+  if (!supabase) {
+    setEditorStatus("当前未连接 Supabase，无法保存到公网数据库。", true);
+    return;
+  }
 
   const { error } = await supabase.from("portfolio_profiles").upsert({
     id: profileId,
@@ -629,12 +770,12 @@ async function saveProfile() {
   });
 
   if (error) {
-    setStatus(editorStatus, `保存失败：${error.message}`, true);
+    setEditorStatus(`保存失败：${error.message}`, true);
     return;
   }
 
   renderForm();
-  setStatus(editorStatus, "已保存。公开页面刷新后会读取最新资料。");
+  clearDirty();
 }
 
 async function uploadSelectedImage(input) {
@@ -642,7 +783,7 @@ async function uploadSelectedImage(input) {
   if (!file) return;
 
   if (!supabase) {
-    setStatus(editorStatus, "当前未连接 Supabase，无法上传图片。", true);
+    setEditorStatus("当前未连接 Supabase，无法上传图片。", true);
     return;
   }
 
@@ -651,7 +792,7 @@ async function uploadSelectedImage(input) {
     .replace(/[^a-z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "");
   const filePath = `${profileId}/${Date.now()}-${safeName || "image"}`;
-  setStatus(editorStatus, "正在上传图片...");
+  setEditorStatus("正在上传图片...");
 
   const { error } = await supabase.storage.from("portfolio-assets").upload(filePath, file, {
     cacheControl: "3600",
@@ -659,7 +800,7 @@ async function uploadSelectedImage(input) {
   });
 
   if (error) {
-    setStatus(editorStatus, `图片上传失败：${error.message}`, true);
+    setEditorStatus(`图片上传失败：${error.message}`, true);
     return;
   }
 
@@ -687,7 +828,7 @@ async function uploadSelectedImage(input) {
   const small = label?.querySelector("small");
   if (small) small.textContent = publicUrl;
 
-  setStatus(editorStatus, "图片已上传。点击 Save to database 后公开页面会使用新图片。");
+  markDirty("图片已上传。点击 Save to database 后公开页面会使用新图片。");
 }
 
 function addItem(type, groupIndex) {
@@ -720,6 +861,7 @@ function addItem(type, groupIndex) {
   }
 
   renderForm();
+  markDirty("已添加内容。点击 Save to database 后发布。");
 }
 
 function removeItem(type, index, groupIndex) {
@@ -733,6 +875,7 @@ function removeItem(type, index, groupIndex) {
   if (type === "link") currentProfile.contact.links.splice(index, 1);
 
   renderForm();
+  markDirty("已删除内容。点击 Save to database 后发布。");
 }
 
 async function init() {
@@ -743,8 +886,9 @@ async function init() {
     loginForm.hidden = true;
     editor.hidden = false;
     currentProfile = clone(localDefault);
+    await loadMessages();
     renderForm();
-    setStatus(editorStatus, "当前仅可预览编辑；配置 Supabase 后才能在线保存。");
+    setEditorStatus("当前仅可预览编辑；配置 Supabase 后才能在线保存。");
     return;
   }
 
@@ -861,7 +1005,18 @@ editor?.addEventListener("click", async (event) => {
   if (button.matches("[data-load-default]")) {
     currentProfile = clone(localDefault || (await loadLocalDefault()));
     renderForm();
-    setStatus(editorStatus, "已载入本地默认资料，保存后会覆盖数据库当前内容。");
+    markDirty("已载入本地默认资料，保存后会覆盖数据库当前内容。");
+  }
+
+  if (button.matches("[data-sync-identity]")) {
+    syncIdentity();
+  }
+
+  if (button.matches("[data-refresh-messages]")) {
+    setEditorStatus("正在刷新留言...");
+    await loadMessages();
+    renderForm();
+    setEditorStatus(messagesLoadError || "留言已刷新。", Boolean(messagesLoadError));
   }
 
   if (button.matches("[data-toggle-json]")) {
@@ -878,9 +1033,9 @@ editor?.addEventListener("click", async (event) => {
     try {
       currentProfile = JSON.parse(editorMount.querySelector("[data-json-editor]").value);
       renderForm();
-      setStatus(editorStatus, "JSON 已应用到表单，点击保存后才会写入数据库。");
+      markDirty("JSON 已应用到表单，点击保存后才会写入数据库。");
     } catch (error) {
-      setStatus(editorStatus, `JSON 格式错误：${error.message}`, true);
+      setEditorStatus(`JSON 格式错误：${error.message}`, true);
     }
   }
 
@@ -897,6 +1052,12 @@ editor?.addEventListener("change", async (event) => {
   const input = event.target.closest("[data-image-upload]");
   if (!input) return;
   await uploadSelectedImage(input);
+});
+
+editor?.addEventListener("input", (event) => {
+  if (!event.target.closest("[data-editor-mount]")) return;
+  if (event.target.closest("[data-json-editor]")) return;
+  markDirty();
 });
 
 init().catch((error) => {

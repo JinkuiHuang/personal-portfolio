@@ -35,6 +35,25 @@ async function loadProfile() {
   }
 }
 
+async function submitContactMessage(formData) {
+  if (!hasSupabaseConfig()) {
+    throw new Error("Supabase 还没有配置，暂时无法在线收取留言。");
+  }
+
+  const email = String(formData.get("email") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+
+  const supabase = await loadSupabaseClient();
+  const { error } = await supabase.from("portfolio_messages").insert({
+    email,
+    message,
+    page_url: window.location.href,
+    user_agent: window.navigator.userAgent,
+  });
+
+  if (error) throw error;
+}
+
 function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -341,13 +360,26 @@ function initInteractions() {
 
   const form = document.querySelector("[data-contact-form]");
   const formStatus = document.querySelector("[data-form-status]");
-  form?.addEventListener("submit", (event) => {
+  form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
     const email = formData.get("email");
+    const submitButton = form.querySelector('button[type="submit"]');
 
-    formStatus.textContent = `Thanks, ${email}. Your message is ready to connect to a backend or email service.`;
-    form.reset();
+    if (submitButton) submitButton.disabled = true;
+    formStatus.textContent = "正在发送...";
+    formStatus.classList.remove("error");
+
+    try {
+      await submitContactMessage(formData);
+      formStatus.textContent = `Thanks, ${email}. Your message has been sent.`;
+      form.reset();
+    } catch (error) {
+      formStatus.textContent = `发送失败：${error.message}`;
+      formStatus.classList.add("error");
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 }
 
