@@ -933,7 +933,7 @@ textarea {
 
 .visual-skill-card-header {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
 }
@@ -950,7 +950,7 @@ textarea {
 
 .visual-skill-item {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) 112px minmax(120px, 0.9fr) auto;
+  grid-template-columns: minmax(150px, 1fr) 112px minmax(120px, 0.9fr) auto auto;
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -1036,7 +1036,7 @@ textarea {
 
 .visual-editor .quick-facts li {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 8px;
 }
@@ -1052,8 +1052,31 @@ textarea {
 }
 
 .visual-link-row {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto auto;
   align-items: end;
+}
+
+.visual-order {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.visual-order button {
+  min-height: 30px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 0 9px;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 780;
+}
+
+.visual-order button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .admin-card,

@@ -169,6 +169,20 @@ function visualTextarea(value = "", attributes = "") {
   return `<div class="visual-editable multiline" contenteditable="true" ${attributes}>${escapeHtml(value)}</div>`;
 }
 
+function orderButtons(type, index, total, groupIndex = "") {
+  const groupAttribute = groupIndex === "" ? "" : ` data-group-index="${groupIndex}"`;
+  return `
+    <div class="visual-order">
+      <button type="button" data-move="${escapeHtml(type)}" data-index="${index}" data-direction="-1"${groupAttribute} ${
+        index <= 0 ? "disabled" : ""
+      }>上移</button>
+      <button type="button" data-move="${escapeHtml(type)}" data-index="${index}" data-direction="1"${groupAttribute} ${
+        index >= total - 1 ? "disabled" : ""
+      }>下移</button>
+    </div>
+  `;
+}
+
 function previewAssetUrl(url = "") {
   const value = String(url);
   if (value.startsWith("./")) return `../${value.slice(2)}`;
@@ -486,6 +500,7 @@ function renderVisualEditor() {
                 <div class="visual-link-row" data-nav-row>
                   ${visualText(item.label, "data-nav-label")}
                   <input data-nav-href value="${escapeHtml(item.href)}" />
+                  ${orderButtons("nav", index, currentProfile.nav?.length || 0)}
                   <button class="visual-remove inline" type="button" data-remove="nav" data-index="${index}">删除</button>
                 </div>
               `,
@@ -514,6 +529,7 @@ function renderVisualEditor() {
                   <li data-fact-row>
                     ${visualText(fact.icon, "data-fact-icon")}
                     ${visualText(fact.text, "data-fact-text")}
+                    ${orderButtons("fact", index, currentProfile.hero?.facts?.length || 0)}
                     <button class="visual-remove inline" type="button" data-remove="fact" data-index="${index}">删除</button>
                   </li>
                 `,
@@ -539,6 +555,7 @@ function renderVisualEditor() {
                   <div data-detail-row>
                     <dt>${visualText(item.label, "data-detail-label")}</dt>
                     <dd>${visualTextarea(item.value, "data-detail-value")}</dd>
+                    ${orderButtons("details", index, currentProfile.details?.items?.length || 0)}
                     <button class="visual-remove" type="button" data-remove="details" data-index="${index}">删除</button>
                   </div>
                 `,
@@ -559,6 +576,7 @@ function renderVisualEditor() {
                     <div class="visual-skill-card-header">
                       <span class="skill-icon visual-editable" contenteditable="true" data-skill-icon>${escapeHtml(group.icon)}</span>
                       <h3>${visualText(group.title, "data-skill-title")}</h3>
+                      ${orderButtons("skillGroup", groupIndex, currentProfile.skills?.groups?.length || 0)}
                       <button class="visual-remove" type="button" data-remove="skillGroup" data-index="${groupIndex}">删除分类</button>
                     </div>
                     <div class="visual-skill-list">
@@ -572,6 +590,7 @@ function renderVisualEditor() {
                                 <input data-skill-level type="number" min="0" max="100" value="${escapeHtml(item.level)}" />
                               </label>
                               <span class="visual-skill-meter" style="--level: ${Number(item.level) || 0}%"></span>
+                              ${orderButtons("skillItem", itemIndex, group.items?.length || 0, groupIndex)}
                               <button class="visual-remove inline" type="button" data-remove="skillItem" data-group-index="${groupIndex}" data-index="${itemIndex}">删除</button>
                             </div>
                           `,
@@ -601,6 +620,7 @@ function renderVisualEditor() {
                     <h3>${visualText(item.role, "data-experience-role")}</h3>
                     <p class="company">${visualText(item.company, "data-experience-company")}</p>
                     <p>${visualTextarea(item.description, "data-experience-description")}</p>
+                    ${orderButtons("experience", index, currentProfile.experience?.items?.length || 0)}
                     <button class="visual-remove" type="button" data-remove="experience" data-index="${index}">删除经历</button>
                   </div>
                 </article>
@@ -645,6 +665,7 @@ function renderVisualEditor() {
                   </div>
                   <label><span>案例链接</span><input data-project-case value="${escapeHtml(project.caseStudyUrl)}" /></label>
                   <label><span>演示链接</span><input data-project-demo value="${escapeHtml(project.demoUrl)}" /></label>
+                  ${orderButtons("project", index, currentProfile.projects?.items?.length || 0)}
                   <button class="visual-remove" type="button" data-remove="project" data-index="${index}">删除项目</button>
                 </article>
               `,
@@ -683,6 +704,7 @@ function renderVisualEditor() {
                 <div class="visual-link-row" data-link-row>
                   ${visualText(link.label, "data-link-label")}
                   <input data-link-url value="${escapeHtml(link.url)}" />
+                  ${orderButtons("link", index, currentProfile.contact?.links?.length || 0)}
                   <button class="visual-remove inline" type="button" data-remove="link" data-index="${index}">删除</button>
                 </div>
               `,
@@ -1244,6 +1266,36 @@ function removeItem(type, index, groupIndex) {
   markDirty("已删除内容。点击 Save to database 后发布。");
 }
 
+function moveArrayItem(items, index, direction) {
+  const targetIndex = index + direction;
+  if (!Array.isArray(items) || targetIndex < 0 || targetIndex >= items.length) return false;
+  const [item] = items.splice(index, 1);
+  items.splice(targetIndex, 0, item);
+  return true;
+}
+
+function moveItem(type, index, direction, groupIndex) {
+  currentProfile = collectProfileFromForm();
+  let moved = false;
+
+  if (type === "nav") moved = moveArrayItem(currentProfile.nav, index, direction);
+  if (type === "fact") moved = moveArrayItem(currentProfile.hero?.facts, index, direction);
+  if (type === "details") moved = moveArrayItem(currentProfile.details?.items, index, direction);
+  if (type === "skillGroup") moved = moveArrayItem(currentProfile.skills?.groups, index, direction);
+  if (type === "skillItem") {
+    moved = moveArrayItem(currentProfile.skills?.groups?.[groupIndex]?.items, index, direction);
+  }
+  if (type === "experience") moved = moveArrayItem(currentProfile.experience?.items, index, direction);
+  if (type === "project") moved = moveArrayItem(currentProfile.projects?.items, index, direction);
+  if (type === "link") moved = moveArrayItem(currentProfile.contact?.links, index, direction);
+
+  if (!moved) return;
+
+  writeDraft(currentProfile);
+  renderForm();
+  markDirty("顺序已调整。点击保存到数据库后发布。");
+}
+
 function restoreDraft() {
   const draft = readDraft();
   if (!draft?.profile) {
@@ -1452,6 +1504,15 @@ editor?.addEventListener("click", async (event) => {
 
   if (button.dataset.remove) {
     removeItem(button.dataset.remove, Number(button.dataset.index), Number(button.dataset.groupIndex));
+  }
+
+  if (button.dataset.move) {
+    moveItem(
+      button.dataset.move,
+      Number(button.dataset.index),
+      Number(button.dataset.direction),
+      Number(button.dataset.groupIndex),
+    );
   }
 });
 
