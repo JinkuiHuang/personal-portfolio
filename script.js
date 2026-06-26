@@ -268,17 +268,22 @@ function renderProfile(profile) {
         <p>${escapeHtml(profile.contact?.body)}</p>
         <form class="contact-form" data-contact-form>
           <label>
-            <span>Your name</span>
-            <input type="text" name="name" placeholder="Your name" autocomplete="name" />
+            <span>${escapeHtml(profile.contact?.nameLabel || "Your name")}</span>
+            <input
+              type="text"
+              name="name"
+              placeholder="${escapeHtml(profile.contact?.namePlaceholder || "Your name")}"
+              autocomplete="name"
+            />
           </label>
           <label>
-            <span>Your email</span>
+            <span>${escapeHtml(profile.contact?.emailLabel || "Your email")}</span>
             <input type="email" name="email" placeholder="${escapeHtml(
               profile.contact?.emailPlaceholder,
             )}" autocomplete="email" required />
           </label>
           <label>
-            <span>Message</span>
+            <span>${escapeHtml(profile.contact?.messageLabel || "Message")}</span>
             <textarea name="message" rows="4" placeholder="${escapeHtml(
               profile.contact?.messagePlaceholder,
             )}" required></textarea>

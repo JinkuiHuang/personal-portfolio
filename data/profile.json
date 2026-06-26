@@ -133,7 +133,11 @@
   "contact": {
     "heading": "Let’s work together",
     "body": "I’m currently open to new opportunities and interesting projects. Whether you have a question or just want to say hi, I’d love to hear from you.",
+    "nameLabel": "Your name",
+    "namePlaceholder": "Your name",
+    "emailLabel": "Your email",
     "emailPlaceholder": "you@example.com",
+    "messageLabel": "Message",
     "messagePlaceholder": "Tell me what you are building",
     "buttonLabel": "Send a Message",
     "connectHeading": "Connect",

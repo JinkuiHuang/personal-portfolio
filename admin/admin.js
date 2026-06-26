@@ -10,12 +10,14 @@ const signUpButton = document.querySelector("[data-sign-up]");
 const resendConfirmationButton = document.querySelector("[data-resend-confirmation]");
 
 const profileId = config.profileId || "main";
+const draftKey = `portfolio-admin-draft:${profileId}`;
 let supabase = null;
 let localDefault = null;
 let currentProfile = null;
 let contactMessages = [];
 let messagesLoadError = "";
 let isDirty = false;
+let hasDraft = false;
 
 function hasConfig() {
   return Boolean(config.url && config.anonKey);
@@ -49,13 +51,52 @@ function setEditorStatus(message, isError = false) {
   saveState.classList.toggle("error", isError);
 }
 
-function markDirty(message = "有未保存修改，点击 Save to database 后才会发布。") {
+function updateDraftButtons() {
+  editorMount?.querySelectorAll("[data-draft-action]").forEach((button) => {
+    button.hidden = !hasDraft;
+  });
+}
+
+function readDraft() {
+  try {
+    const raw = localStorage.getItem(draftKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn("Unable to read portfolio draft:", error.message);
+    return null;
+  }
+}
+
+function writeDraft(profile = currentProfile) {
+  try {
+    localStorage.setItem(
+      draftKey,
+      JSON.stringify({
+        savedAt: new Date().toISOString(),
+        profile,
+      }),
+    );
+    hasDraft = true;
+    updateDraftButtons();
+  } catch (error) {
+    console.warn("Unable to save portfolio draft:", error.message);
+  }
+}
+
+function clearDraft() {
+  localStorage.removeItem(draftKey);
+  hasDraft = false;
+  updateDraftButtons();
+}
+
+function markDirty(message = "有未保存修改，点击保存到数据库后才会发布。") {
   isDirty = true;
   setEditorStatus(message);
 }
 
 function clearDirty(message = "已保存。公开页面刷新后会读取最新资料。") {
   isDirty = false;
+  clearDraft();
   setEditorStatus(message);
 }
 
@@ -649,6 +690,12 @@ function renderForm() {
       <div class="editor-actions">
         <a class="button secondary" href="../" target="_blank" rel="noreferrer">查看公开页</a>
         <button class="button secondary" type="button" data-sync-identity>同步姓名资料</button>
+        <button class="button secondary" type="button" data-draft-action data-restore-draft ${
+          hasDraft ? "" : "hidden"
+        }>恢复草稿</button>
+        <button class="button secondary" type="button" data-draft-action data-discard-draft ${
+          hasDraft ? "" : "hidden"
+        }>丢弃草稿</button>
         <button class="button secondary" type="button" data-load-default>载入默认资料</button>
         <button class="button secondary" type="button" data-toggle-form>详细表单</button>
         <button class="button secondary" type="button" data-toggle-json>Advanced JSON</button>
@@ -678,6 +725,20 @@ function renderForm() {
               ${field("简历下载链接", "hero.resumeUrl")}
             </div>
             ${field("个人简介", "hero.summary", { textarea: true, rows: 4 })}
+          `,
+        )}
+        ${section(
+          "联系表单文案",
+          `
+            <div class="admin-form-grid">
+              ${field("姓名标签", "contact.nameLabel")}
+              ${field("姓名占位提示", "contact.namePlaceholder")}
+              ${field("邮箱标签", "contact.emailLabel")}
+              ${field("邮箱占位提示", "contact.emailPlaceholder")}
+              ${field("留言标签", "contact.messageLabel")}
+              ${field("留言占位提示", "contact.messagePlaceholder")}
+              ${field("发送按钮文字", "contact.buttonLabel")}
+            </div>
           `,
         )}
       </form>
@@ -842,6 +903,7 @@ function syncIdentity() {
     }
   }
 
+  writeDraft(currentProfile);
   renderForm();
   markDirty("已同步姓名、标题、页脚和邮箱链接。点击 Save to database 后发布。");
 }
@@ -857,6 +919,7 @@ async function loadProfile() {
   if (error) throw error;
   currentProfile = clone(data?.content || fallback);
   isDirty = false;
+  hasDraft = Boolean(readDraft());
   await loadMessages();
   renderForm();
 }
@@ -933,6 +996,8 @@ async function uploadSelectedImage(input) {
   const small = label?.querySelector("small");
   if (small) small.textContent = publicUrl;
 
+  currentProfile = collectProfileFromForm();
+  writeDraft(currentProfile);
   markDirty("图片已上传。点击 Save to database 后公开页面会使用新图片。");
 }
 
@@ -965,6 +1030,7 @@ function addItem(type, groupIndex) {
     currentProfile.contact.links.push({ label: "New link", url: "#" });
   }
 
+  writeDraft(currentProfile);
   renderForm();
   markDirty("已添加内容。点击 Save to database 后发布。");
 }
@@ -979,8 +1045,31 @@ function removeItem(type, index, groupIndex) {
   if (type === "project") currentProfile.projects.items.splice(index, 1);
   if (type === "link") currentProfile.contact.links.splice(index, 1);
 
+  writeDraft(currentProfile);
   renderForm();
   markDirty("已删除内容。点击 Save to database 后发布。");
+}
+
+function restoreDraft() {
+  const draft = readDraft();
+  if (!draft?.profile) {
+    hasDraft = false;
+    renderForm();
+    setEditorStatus("没有找到可恢复的草稿。", true);
+    return;
+  }
+
+  currentProfile = clone(draft.profile);
+  isDirty = true;
+  hasDraft = true;
+  renderForm();
+  setEditorStatus(`已恢复 ${new Date(draft.savedAt).toLocaleString()} 的草稿，保存后才会发布。`);
+}
+
+function discardDraft() {
+  clearDraft();
+  renderForm();
+  setEditorStatus("本机草稿已丢弃，当前页面内容未改变。");
 }
 
 async function init() {
@@ -991,6 +1080,7 @@ async function init() {
     loginForm.hidden = true;
     editor.hidden = false;
     currentProfile = clone(localDefault);
+    hasDraft = Boolean(readDraft());
     await loadMessages();
     renderForm();
     setEditorStatus("当前仅可预览编辑；配置 Supabase 后才能在线保存。");
@@ -1109,8 +1199,17 @@ editor?.addEventListener("click", async (event) => {
 
   if (button.matches("[data-load-default]")) {
     currentProfile = clone(localDefault || (await loadLocalDefault()));
+    writeDraft(currentProfile);
     renderForm();
     markDirty("已载入本地默认资料，保存后会覆盖数据库当前内容。");
+  }
+
+  if (button.matches("[data-restore-draft]")) {
+    restoreDraft();
+  }
+
+  if (button.matches("[data-discard-draft]")) {
+    discardDraft();
   }
 
   if (button.matches("[data-sync-identity]")) {
@@ -1145,6 +1244,7 @@ editor?.addEventListener("click", async (event) => {
   if (button.matches("[data-apply-json]")) {
     try {
       currentProfile = JSON.parse(editorMount.querySelector("[data-json-editor]").value);
+      writeDraft(currentProfile);
       renderForm();
       markDirty("JSON 已应用到表单，点击保存后才会写入数据库。");
     } catch (error) {
@@ -1170,7 +1270,22 @@ editor?.addEventListener("change", async (event) => {
 editor?.addEventListener("input", (event) => {
   if (!event.target.closest("[data-editor-mount]")) return;
   if (event.target.closest("[data-json-editor]")) return;
+  currentProfile = collectProfileFromForm();
+  writeDraft(currentProfile);
   markDirty();
+});
+
+window.addEventListener("beforeunload", (event) => {
+  if (!isDirty) return;
+  event.preventDefault();
+  event.returnValue = "";
+});
+
+window.addEventListener("keydown", async (event) => {
+  if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "s") return;
+  if (editor.hidden) return;
+  event.preventDefault();
+  await saveProfile();
 });
 
 init().catch((error) => {
