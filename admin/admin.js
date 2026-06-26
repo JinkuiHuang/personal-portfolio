@@ -409,6 +409,26 @@ function renderVisualEditor() {
         <span>直接点击页面里的文字修改。图片使用 Choose file 选择文件上传。</span>
       </div>
 
+      <section class="admin-card visual-nav-card">
+        <div class="admin-card-heading">
+          <h3>导航菜单</h3>
+        </div>
+        <div class="visual-nav-list">
+          ${(currentProfile.nav || [])
+            .map(
+              (item, index) => `
+                <div class="visual-link-row" data-nav-row>
+                  ${visualText(item.label, "data-nav-label")}
+                  <input data-nav-href value="${escapeHtml(item.href)}" />
+                  <button class="visual-remove inline" type="button" data-remove="nav" data-index="${index}">删除</button>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+        <button class="button secondary compact" type="button" data-add="nav">Add nav item</button>
+      </section>
+
       <section class="hero section visual-section">
         <div class="hero-copy">
           <h1>${editable("hero.name")}</h1>
@@ -416,6 +436,10 @@ function renderVisualEditor() {
           <span class="rule"></span>
           <h2>${editable("hero.headline")}</h2>
           <p>${editable("hero.summary", "", { block: true })}</p>
+          <div class="hero-actions visual-button-editor">
+            <span class="button primary"><span aria-hidden="true">↓</span>${editable("hero.resumeLabel")}</span>
+            <span class="button secondary"><span aria-hidden="true">□</span>${editable("hero.workLabel")}</span>
+          </div>
           <ul class="quick-facts" aria-label="快速联系方式">
             ${(currentProfile.hero?.facts || [])
               .map(
@@ -452,6 +476,7 @@ function renderVisualEditor() {
               )
               .join("")}
           </dl>
+          <a class="text-link" href="#contact">${editable("details.moreLabel")} <span aria-hidden="true">→</span></a>
           <button class="button secondary compact" type="button" data-add="details">Add detail</button>
         </div>
 
@@ -519,6 +544,14 @@ function renderVisualEditor() {
 
       <section class="section projects-section visual-section">
         <div class="section-heading"><h2>${editable("projects.heading")}</h2><span class="rule small"></span></div>
+        <div class="visual-project-labels">
+          <label><span>案例按钮文字</span><input data-path="projects.caseStudyLabel" value="${escapeHtml(
+            currentProfile.projects?.caseStudyLabel || "View Case Study",
+          )}" /></label>
+          <label><span>演示按钮文字</span><input data-path="projects.demoLabel" value="${escapeHtml(
+            currentProfile.projects?.demoLabel || "Live Demo",
+          )}" /></label>
+        </div>
         <div class="project-grid">
           ${(currentProfile.projects?.items || [])
             .map(
@@ -537,6 +570,10 @@ function renderVisualEditor() {
                   <label><span>图片说明</span><input data-project-alt value="${escapeHtml(project.imageAlt)}" /></label>
                   <h3>${visualText(project.title, "data-project-title")}</h3>
                   <p>${visualTextarea(project.description, "data-project-description")}</p>
+                  <div class="project-links">
+                    <span>${escapeHtml(currentProfile.projects?.caseStudyLabel || "View Case Study")} →</span>
+                    <span>${escapeHtml(currentProfile.projects?.demoLabel || "Live Demo")} ↗</span>
+                  </div>
                   <label><span>案例链接</span><input data-project-case value="${escapeHtml(project.caseStudyUrl)}" /></label>
                   <label><span>演示链接</span><input data-project-demo value="${escapeHtml(project.demoUrl)}" /></label>
                   <button class="visual-remove" type="button" data-remove="project" data-index="${index}">删除项目</button>
@@ -545,6 +582,7 @@ function renderVisualEditor() {
             )
             .join("")}
         </div>
+        <a class="center-link" href="#contact">${editable("projects.moreLabel")} <span aria-hidden="true">→</span></a>
         <button class="button secondary compact" type="button" data-add="project">Add project</button>
       </section>
 
@@ -552,6 +590,20 @@ function renderVisualEditor() {
         <div class="contact-copy">
           <div class="section-heading"><h2>${editable("contact.heading")}</h2><span class="rule small"></span></div>
           <p>${editable("contact.body", "", { block: true })}</p>
+          <div class="visual-form-labels">
+            <label><span>姓名标签</span><input data-path="contact.nameLabel" value="${escapeHtml(
+              currentProfile.contact?.nameLabel || "Your name",
+            )}" /></label>
+            <label><span>姓名提示</span><input data-path="contact.namePlaceholder" value="${escapeHtml(
+              currentProfile.contact?.namePlaceholder || "Your name",
+            )}" /></label>
+            <label><span>邮箱标签</span><input data-path="contact.emailLabel" value="${escapeHtml(
+              currentProfile.contact?.emailLabel || "Your email",
+            )}" /></label>
+            <label><span>留言标签</span><input data-path="contact.messageLabel" value="${escapeHtml(
+              currentProfile.contact?.messageLabel || "Message",
+            )}" /></label>
+          </div>
           <span class="button primary"><span aria-hidden="true">✉</span>${editable("contact.buttonLabel")}</span>
         </div>
         <aside class="connect-list">
@@ -723,6 +775,12 @@ function renderForm() {
               ${field("一句话定位", "hero.headline")}
               ${field("头像路径", "hero.image")}
               ${field("简历下载链接", "hero.resumeUrl")}
+              ${field("简历按钮文字", "hero.resumeLabel")}
+              ${field("作品按钮文字", "hero.workLabel")}
+              ${field("个人详情更多链接文字", "details.moreLabel")}
+              ${field("项目更多链接文字", "projects.moreLabel")}
+              ${field("项目案例按钮文字", "projects.caseStudyLabel")}
+              ${field("项目演示按钮文字", "projects.demoLabel")}
             </div>
             ${field("个人简介", "hero.summary", { textarea: true, rows: 4 })}
           `,
@@ -762,6 +820,11 @@ function collectProfileFromForm() {
     if (closedDetails) return;
     setValue(input.dataset.path, readValue(input), next);
   });
+
+  next.nav = [...editorMount.querySelectorAll("[data-nav-row]")].map((row) => ({
+    label: readValue(row.querySelector("[data-nav-label]")),
+    href: readValue(row.querySelector("[data-nav-href]")),
+  }));
 
   next.details.items = [...editorMount.querySelectorAll("[data-detail-row]")].map((row) => ({
     label: readValue(row.querySelector("[data-detail-label]")),
@@ -1007,6 +1070,9 @@ function addItem(type, groupIndex) {
   if (type === "details") {
     currentProfile.details.items.push({ label: "New field", value: "" });
   }
+  if (type === "nav") {
+    currentProfile.nav.push({ label: "New nav", href: "#" });
+  }
   if (type === "skillGroup") {
     currentProfile.skills.groups.push({ icon: "•", title: "New group", items: [] });
   }
@@ -1039,6 +1105,7 @@ function removeItem(type, index, groupIndex) {
   currentProfile = collectProfileFromForm();
 
   if (type === "details") currentProfile.details.items.splice(index, 1);
+  if (type === "nav") currentProfile.nav.splice(index, 1);
   if (type === "skillGroup") currentProfile.skills.groups.splice(index, 1);
   if (type === "skillItem") currentProfile.skills.groups[groupIndex].items.splice(index, 1);
   if (type === "experience") currentProfile.experience.items.splice(index, 1);

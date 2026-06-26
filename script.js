@@ -246,8 +246,12 @@ function renderProfile(profile) {
                 <h3>${escapeHtml(project.title)}</h3>
                 <p>${escapeHtml(project.description)}</p>
                 <div class="project-links">
-                  <a href="${safeUrl(project.caseStudyUrl)}">View Case Study <span aria-hidden="true">→</span></a>
-                  <a href="${safeUrl(project.demoUrl)}">Live Demo <span aria-hidden="true">↗</span></a>
+                  <a href="${safeUrl(project.caseStudyUrl)}">${escapeHtml(
+                    profile.projects?.caseStudyLabel || "View Case Study",
+                  )} <span aria-hidden="true">→</span></a>
+                  <a href="${safeUrl(project.demoUrl)}">${escapeHtml(
+                    profile.projects?.demoLabel || "Live Demo",
+                  )} <span aria-hidden="true">↗</span></a>
                 </div>
               </article>
             `,

@@ -103,6 +103,8 @@
   "projects": {
     "heading": "Selected Work",
     "moreLabel": "See more projects",
+    "caseStudyLabel": "View Case Study",
+    "demoLabel": "Live Demo",
     "items": [
       {
         "title": "Finch Dashboard",

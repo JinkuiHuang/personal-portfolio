@@ -842,6 +842,8 @@ textarea {
 .visual-image-editor label,
 .visual-project-card label,
 .visual-link-row,
+.visual-form-labels label,
+.visual-project-labels label,
 .visual-level,
 .visual-upload {
   display: grid;
@@ -854,6 +856,8 @@ textarea {
 .visual-image-editor input,
 .visual-project-card input,
 .visual-link-row input,
+.visual-form-labels input,
+.visual-project-labels input,
 .visual-level input {
   width: 100%;
   border: 1px solid var(--line-strong);
@@ -972,6 +976,31 @@ textarea {
 
 .visual-project-card {
   align-content: start;
+}
+
+.visual-nav-card {
+  gap: 12px;
+}
+
+.visual-nav-list,
+.visual-form-labels,
+.visual-project-labels {
+  display: grid;
+  gap: 12px;
+}
+
+.visual-form-labels,
+.visual-project-labels {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.visual-button-editor {
+  align-items: center;
+}
+
+.visual-project-card .project-links span {
+  color: var(--accent);
+  font-weight: 780;
 }
 
 .visual-link-row {
@@ -1308,7 +1337,9 @@ textarea {
 
   .visual-skill-card-header,
   .visual-skill-item,
-  .visual-link-row {
+  .visual-link-row,
+  .visual-form-labels,
+  .visual-project-labels {
     grid-template-columns: 1fr;
   }
 }
