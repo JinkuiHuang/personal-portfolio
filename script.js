@@ -40,11 +40,17 @@ async function submitContactMessage(formData) {
     throw new Error("Supabase 还没有配置，暂时无法在线收取留言。");
   }
 
+  if (String(formData.get("website") || "").trim()) {
+    return;
+  }
+
+  const visitorName = String(formData.get("name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const message = String(formData.get("message") || "").trim();
 
   const supabase = await loadSupabaseClient();
   const { error } = await supabase.from("portfolio_messages").insert({
+    visitor_name: visitorName,
     email,
     message,
     page_url: window.location.href,
@@ -262,16 +268,24 @@ function renderProfile(profile) {
         <p>${escapeHtml(profile.contact?.body)}</p>
         <form class="contact-form" data-contact-form>
           <label>
+            <span>Your name</span>
+            <input type="text" name="name" placeholder="Your name" autocomplete="name" />
+          </label>
+          <label>
             <span>Your email</span>
             <input type="email" name="email" placeholder="${escapeHtml(
               profile.contact?.emailPlaceholder,
-            )}" required />
+            )}" autocomplete="email" required />
           </label>
           <label>
             <span>Message</span>
             <textarea name="message" rows="4" placeholder="${escapeHtml(
               profile.contact?.messagePlaceholder,
             )}" required></textarea>
+          </label>
+          <label class="form-trap" aria-hidden="true" tabindex="-1">
+            <span>Website</span>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
           </label>
           <button class="button primary" type="submit">
             <span aria-hidden="true">✉</span>

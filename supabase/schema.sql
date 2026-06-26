@@ -95,6 +95,7 @@ using (
 
 create table if not exists public.portfolio_messages (
   id uuid primary key default gen_random_uuid(),
+  visitor_name text,
   email text not null,
   message text not null,
   page_url text,
@@ -102,6 +103,9 @@ create table if not exists public.portfolio_messages (
   is_read boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+alter table public.portfolio_messages
+add column if not exists visitor_name text;
 
 alter table public.portfolio_messages enable row level security;
 

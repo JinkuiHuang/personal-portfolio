@@ -545,6 +545,14 @@ textarea {
   cursor: pointer;
 }
 
+.form-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .form-status {
   min-height: 24px;
   margin: 0;
@@ -1016,6 +1024,11 @@ textarea {
   background: var(--surface);
 }
 
+.message-item.unread {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 52%, var(--surface));
+}
+
 .message-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1025,8 +1038,18 @@ textarea {
   font-size: 0.86rem;
 }
 
+.message-meta > div {
+  display: grid;
+  gap: 3px;
+}
+
 .message-meta strong {
   color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.message-meta a {
+  color: var(--accent);
   overflow-wrap: anywhere;
 }
 
@@ -1040,6 +1063,41 @@ textarea {
 
 .empty-state.error {
   color: #b42318;
+}
+
+.message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.message-badge {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 780;
+}
+
+.health-card.needs-work {
+  border-color: color-mix(in srgb, var(--warm) 52%, var(--line));
+}
+
+.health-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.health-list li::marker {
+  color: var(--accent);
 }
 
 .admin-form-grid,

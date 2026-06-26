@@ -537,12 +537,24 @@ function renderMessagesPanel() {
   const messageRows = contactMessages
     .map(
       (message) => `
-        <article class="message-item">
+        <article class="message-item ${message.is_read ? "" : "unread"}">
           <div class="message-meta">
-            <strong>${escapeHtml(message.email)}</strong>
+            <div>
+              <strong>${escapeHtml(message.visitor_name || "未留姓名")}</strong>
+              <a href="mailto:${escapeHtml(message.email)}">${escapeHtml(message.email)}</a>
+            </div>
             <time>${escapeHtml(new Date(message.created_at).toLocaleString())}</time>
           </div>
           <p>${escapeHtml(message.message)}</p>
+          <div class="message-actions">
+            <span class="message-badge">${message.is_read ? "已读" : "未读"}</span>
+            <button class="button secondary compact" type="button" data-toggle-message-read data-message-id="${escapeHtml(
+              message.id,
+            )}" data-is-read="${message.is_read ? "true" : "false"}">${message.is_read ? "标为未读" : "标为已读"}</button>
+            <button class="visual-remove" type="button" data-delete-message data-message-id="${escapeHtml(
+              message.id,
+            )}">删除</button>
+          </div>
         </article>
       `,
     )
@@ -566,6 +578,64 @@ function renderMessagesPanel() {
   `;
 }
 
+function getProfileIssues() {
+  const issues = [];
+  const profileText = JSON.stringify(currentProfile || {});
+  const templateNames = ["Alex Chen", "alexchen", "alex.chen@email.com"];
+
+  templateNames.forEach((text) => {
+    if (profileText.includes(text)) {
+      issues.push(`仍包含模板内容：${text}`);
+    }
+  });
+
+  const emptyLinks = [
+    ...(currentProfile.projects?.items || []).flatMap((project) => [
+      ["项目案例链接", project.caseStudyUrl],
+      ["项目演示链接", project.demoUrl],
+    ]),
+    ...(currentProfile.contact?.links || []).map((link) => ["联系链接", link.url]),
+  ].filter(([, url]) => !url || url === "#");
+
+  if (emptyLinks.length) {
+    issues.push(`有 ${emptyLinks.length} 个链接还是空链接 #。`);
+  }
+
+  if (!String(currentProfile.hero?.name || "").trim()) {
+    issues.push("首页姓名为空。");
+  }
+
+  if (!String(currentProfile.hero?.image || "").trim()) {
+    issues.push("头像图片为空。");
+  }
+
+  if (!issues.length) {
+    issues.push("目前没有发现明显的模板残留或空链接。");
+  }
+
+  return issues;
+}
+
+function renderProfileHealthPanel() {
+  const issues = getProfileIssues();
+  const hasIssue = !issues.every((issue) => issue.startsWith("目前没有"));
+
+  return `
+    <section class="admin-card health-card ${hasIssue ? "needs-work" : ""}">
+      <div class="admin-card-heading split">
+        <div>
+          <h3>资料检查</h3>
+          <p>帮你快速发现模板残留、空链接和容易漏掉的信息。</p>
+        </div>
+        <button class="button secondary compact" type="button" data-sync-identity>同步姓名资料</button>
+      </div>
+      <ul class="health-list">
+        ${issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}
+      </ul>
+    </section>
+  `;
+}
+
 function renderForm() {
   editorMount.innerHTML = `
     <div class="editor-toolbar">
@@ -577,16 +647,17 @@ function renderForm() {
         }</span>
       </div>
       <div class="editor-actions">
-        <a class="button secondary" href="../" target="_blank" rel="noreferrer">View public site</a>
-        <button class="button secondary" type="button" data-sync-identity>Sync identity</button>
-        <button class="button secondary" type="button" data-load-default>Load local default</button>
-        <button class="button secondary" type="button" data-toggle-form>Detailed form</button>
+        <a class="button secondary" href="../" target="_blank" rel="noreferrer">查看公开页</a>
+        <button class="button secondary" type="button" data-sync-identity>同步姓名资料</button>
+        <button class="button secondary" type="button" data-load-default>载入默认资料</button>
+        <button class="button secondary" type="button" data-toggle-form>详细表单</button>
         <button class="button secondary" type="button" data-toggle-json>Advanced JSON</button>
-        <button class="button primary" type="button" data-save-profile>Save to database</button>
+        <button class="button primary" type="button" data-save-profile>保存到数据库</button>
       </div>
     </div>
 
     ${renderVisualEditor()}
+    ${renderProfileHealthPanel()}
     ${renderMessagesPanel()}
 
     <details class="form-details">
@@ -680,7 +751,7 @@ async function loadMessages() {
 
   const { data, error } = await supabase
     .from("portfolio_messages")
-    .select("id,email,message,created_at,is_read")
+    .select("id,visitor_name,email,message,created_at,is_read")
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -690,6 +761,40 @@ async function loadMessages() {
   }
 
   contactMessages = data || [];
+}
+
+async function updateMessageRead(messageId, isRead) {
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("portfolio_messages")
+    .update({ is_read: isRead })
+    .eq("id", messageId);
+
+  if (error) {
+    setEditorStatus(`更新留言失败：${error.message}`, true);
+    return;
+  }
+
+  await loadMessages();
+  renderForm();
+  setEditorStatus(isRead ? "已标记为已读。" : "已标记为未读。");
+}
+
+async function deleteMessage(messageId) {
+  if (!supabase) return;
+  if (!window.confirm("确定删除这条留言吗？删除后不可恢复。")) return;
+
+  const { error } = await supabase.from("portfolio_messages").delete().eq("id", messageId);
+
+  if (error) {
+    setEditorStatus(`删除留言失败：${error.message}`, true);
+    return;
+  }
+
+  await loadMessages();
+  renderForm();
+  setEditorStatus("留言已删除。");
 }
 
 function syncIdentity() {
@@ -1017,6 +1122,14 @@ editor?.addEventListener("click", async (event) => {
     await loadMessages();
     renderForm();
     setEditorStatus(messagesLoadError || "留言已刷新。", Boolean(messagesLoadError));
+  }
+
+  if (button.matches("[data-toggle-message-read]")) {
+    await updateMessageRead(button.dataset.messageId, button.dataset.isRead !== "true");
+  }
+
+  if (button.matches("[data-delete-message]")) {
+    await deleteMessage(button.dataset.messageId);
   }
 
   if (button.matches("[data-toggle-json]")) {
