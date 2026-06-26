@@ -393,34 +393,39 @@ function renderVisualEditor() {
 
         <div class="skills-block">
           <div class="section-heading"><h2>${editable("skills.heading")}</h2><span class="rule small"></span></div>
-          ${(currentProfile.skills?.groups || [])
-            .map(
-              (group, groupIndex) => `
-                <article class="skill-group visual-skill-group" data-skill-group>
-                  <div>
-                    <span class="skill-icon visual-editable" contenteditable="true" data-skill-icon>${escapeHtml(group.icon)}</span>
-                    <h3>${visualText(group.title, "data-skill-title")}</h3>
-                    <button class="visual-remove" type="button" data-remove="skillGroup" data-index="${groupIndex}">删除分类</button>
-                    ${(group.items || [])
-                      .map(
-                        (item, itemIndex) => `
-                          <p data-skill-item>
-                            ${visualText(item.label, "data-skill-label")}
-                            <label class="visual-level"><span>熟练度</span><input data-skill-level type="number" min="0" max="100" value="${escapeHtml(item.level)}" /></label>
-                            <button class="visual-remove inline" type="button" data-remove="skillItem" data-group-index="${groupIndex}" data-index="${itemIndex}">删除</button>
-                          </p>
-                        `,
-                      )
-                      .join("")}
+          <div class="visual-skill-grid">
+            ${(currentProfile.skills?.groups || [])
+              .map(
+                (group, groupIndex) => `
+                  <article class="visual-skill-card" data-skill-group>
+                    <div class="visual-skill-card-header">
+                      <span class="skill-icon visual-editable" contenteditable="true" data-skill-icon>${escapeHtml(group.icon)}</span>
+                      <h3>${visualText(group.title, "data-skill-title")}</h3>
+                      <button class="visual-remove" type="button" data-remove="skillGroup" data-index="${groupIndex}">删除分类</button>
+                    </div>
+                    <div class="visual-skill-list">
+                      ${(group.items || [])
+                        .map(
+                          (item, itemIndex) => `
+                            <div class="visual-skill-item" data-skill-item>
+                              ${visualText(item.label, "data-skill-label")}
+                              <label class="visual-level">
+                                <span>熟练度</span>
+                                <input data-skill-level type="number" min="0" max="100" value="${escapeHtml(item.level)}" />
+                              </label>
+                              <span class="visual-skill-meter" style="--level: ${Number(item.level) || 0}%"></span>
+                              <button class="visual-remove inline" type="button" data-remove="skillItem" data-group-index="${groupIndex}" data-index="${itemIndex}">删除</button>
+                            </div>
+                          `,
+                        )
+                        .join("")}
+                    </div>
                     <button class="button secondary compact" type="button" data-add="skillItem" data-group-index="${groupIndex}">Add skill</button>
-                  </div>
-                  <div class="meters">${(group.items || [])
-                    .map((item) => `<span style="--level: ${Number(item.level) || 0}%"></span>`)
-                    .join("")}</div>
-                </article>
-              `,
-            )
-            .join("")}
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
           <button class="button secondary compact" type="button" data-add="skillGroup">Add skill group</button>
         </div>
       </section>

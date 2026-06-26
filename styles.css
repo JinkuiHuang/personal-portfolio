@@ -849,11 +849,61 @@ textarea {
   margin-left: 8px;
 }
 
-.visual-skill-group p {
+.visual-skill-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px auto;
-  align-items: end;
+  gap: 16px;
+}
+
+.visual-skill-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.visual-skill-card-header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
   gap: 10px;
+}
+
+.visual-skill-card-header h3 {
+  margin: 0;
+  min-width: 0;
+}
+
+.visual-skill-list {
+  display: grid;
+  gap: 10px;
+}
+
+.visual-skill-item {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 112px minmax(120px, 0.9fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.visual-skill-item > .visual-editable {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.visual-skill-meter {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--accent), var(--accent)) 0 0 / var(--level) 100% no-repeat,
+    var(--line);
 }
 
 .visual-project-card {
@@ -1083,7 +1133,8 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .visual-skill-group p,
+  .visual-skill-card-header,
+  .visual-skill-item,
   .visual-link-row {
     grid-template-columns: 1fr;
   }
