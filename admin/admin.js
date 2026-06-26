@@ -196,12 +196,12 @@ function imageUploader(label, targetPath, currentUrl, previewSelector) {
       <span>${escapeHtml(label)}</span>
       <input type="hidden" data-path="${escapeHtml(targetPath)}" value="${escapeHtml(currentUrl || "")}" />
       <label class="upload-button">
-        Choose file
+        选择文件
         <input type="file" accept="image/*" data-image-upload data-image-target="${escapeHtml(
           targetPath,
         )}" data-preview-target="${escapeHtml(previewSelector)}" />
       </label>
-      <small>${escapeHtml(currentUrl || "No image selected")}</small>
+      <small>${escapeHtml(currentUrl || "尚未选择图片")}</small>
     </div>
   `;
 }
@@ -212,12 +212,12 @@ function fileUploader(label, targetPath, currentUrl, accept = ".pdf,.doc,.docx,i
       <span>${escapeHtml(label)}</span>
       <input type="hidden" data-path="${escapeHtml(targetPath)}" value="${escapeHtml(currentUrl || "")}" />
       <label class="upload-button">
-        Choose file
+        选择文件
         <input type="file" accept="${escapeHtml(accept)}" data-file-upload data-file-target="${escapeHtml(
           targetPath,
         )}" />
       </label>
-      <small>${escapeHtml(currentUrl || "No file selected")}</small>
+      <small>${escapeHtml(currentUrl || "尚未选择文件")}</small>
     </div>
   `;
 }
@@ -263,7 +263,7 @@ function renderDetails() {
           )
           .join("")}
       </div>
-      <button class="button secondary" type="button" data-add="details">Add detail</button>
+      <button class="button secondary" type="button" data-add="details">添加详情</button>
     `,
   );
 }
@@ -306,13 +306,13 @@ function renderSkills() {
                     `,
                   )
                   .join("")}
-                <button class="button secondary compact" type="button" data-add="skillItem" data-group-index="${groupIndex}">Add skill</button>
+                <button class="button secondary compact" type="button" data-add="skillItem" data-group-index="${groupIndex}">添加技能</button>
               </div>
             `,
           )
           .join("")}
       </div>
-      <button class="button secondary" type="button" data-add="skillGroup">Add skill group</button>
+      <button class="button secondary" type="button" data-add="skillGroup">添加技能分类</button>
     `,
   );
 }
@@ -349,7 +349,7 @@ function renderExperience() {
           )
           .join("")}
       </div>
-      <button class="button secondary" type="button" data-add="experience">Add experience</button>
+      <button class="button secondary" type="button" data-add="experience">添加经历</button>
     `,
   );
 }
@@ -394,7 +394,7 @@ function renderProjects() {
           )
           .join("")}
       </div>
-      <button class="button secondary" type="button" data-add="project">Add project</button>
+      <button class="button secondary" type="button" data-add="project">添加项目</button>
     `,
   );
 }
@@ -426,7 +426,7 @@ function renderContactLinks() {
           )
           .join("")}
       </div>
-      <button class="button secondary" type="button" data-add="link">Add link</button>
+      <button class="button secondary" type="button" data-add="link">添加链接</button>
     `,
   );
 }
@@ -436,7 +436,7 @@ function renderVisualEditor() {
     <section class="visual-editor" data-visual-editor>
       <div class="visual-note">
         <strong>可视化编辑模式</strong>
-        <span>直接点击页面里的文字修改。图片使用 Choose file 选择文件上传。</span>
+        <span>直接点击页面里的文字修改。图片和文件使用“选择文件”上传。</span>
       </div>
 
       <section class="admin-card visual-site-card">
@@ -507,7 +507,7 @@ function renderVisualEditor() {
             )
             .join("")}
         </div>
-        <button class="button secondary compact" type="button" data-add="nav">Add nav item</button>
+        <button class="button secondary compact" type="button" data-add="nav">添加导航项</button>
       </section>
 
       <section class="hero section visual-section">
@@ -536,7 +536,7 @@ function renderVisualEditor() {
               )
               .join("")}
           </ul>
-          <button class="button secondary compact" type="button" data-add="fact">Add quick info</button>
+          <button class="button secondary compact" type="button" data-add="fact">添加快速信息</button>
         </div>
         <figure class="hero-media visual-image-editor">
           <img data-image-preview="hero.image" src="${escapeHtml(previewAssetUrl(currentProfile.hero?.image))}" alt="${escapeHtml(currentProfile.hero?.imageAlt)}" />
@@ -563,7 +563,7 @@ function renderVisualEditor() {
               .join("")}
           </dl>
           <a class="text-link" href="#contact">${editable("details.moreLabel")} <span aria-hidden="true">→</span></a>
-          <button class="button secondary compact" type="button" data-add="details">Add detail</button>
+          <button class="button secondary compact" type="button" data-add="details">添加详情</button>
         </div>
 
         <div class="skills-block">
@@ -597,13 +597,13 @@ function renderVisualEditor() {
                         )
                         .join("")}
                     </div>
-                    <button class="button secondary compact" type="button" data-add="skillItem" data-group-index="${groupIndex}">Add skill</button>
+                    <button class="button secondary compact" type="button" data-add="skillItem" data-group-index="${groupIndex}">添加技能</button>
                   </article>
                 `,
               )
               .join("")}
           </div>
-          <button class="button secondary compact" type="button" data-add="skillGroup">Add skill group</button>
+          <button class="button secondary compact" type="button" data-add="skillGroup">添加技能分类</button>
         </div>
       </section>
 
@@ -628,7 +628,7 @@ function renderVisualEditor() {
             )
             .join("")}
         </div>
-        <button class="button secondary compact" type="button" data-add="experience">Add experience</button>
+        <button class="button secondary compact" type="button" data-add="experience">添加经历</button>
       </section>
 
       <section class="section projects-section visual-section">
@@ -651,10 +651,10 @@ function renderVisualEditor() {
                     <span>项目图片</span>
                     <input type="hidden" data-project-image value="${escapeHtml(project.image || "")}" />
                     <label class="upload-button">
-                      Choose file
+                      选择文件
                       <input type="file" accept="image/*" data-image-upload data-project-index="${index}" data-preview-target="project.${index}.image" />
                     </label>
-                    <small>${escapeHtml(project.image || "No image selected")}</small>
+                    <small>${escapeHtml(project.image || "尚未选择图片")}</small>
                   </div>
                   <label><span>图片说明</span><input data-project-alt value="${escapeHtml(project.imageAlt)}" /></label>
                   <h3>${visualText(project.title, "data-project-title")}</h3>
@@ -673,7 +673,7 @@ function renderVisualEditor() {
             .join("")}
         </div>
         <a class="center-link" href="#contact">${editable("projects.moreLabel")} <span aria-hidden="true">→</span></a>
-        <button class="button secondary compact" type="button" data-add="project">Add project</button>
+        <button class="button secondary compact" type="button" data-add="project">添加项目</button>
       </section>
 
       <section class="section contact-section visual-section">
@@ -710,7 +710,7 @@ function renderVisualEditor() {
               `,
             )
             .join("")}
-          <button class="button secondary compact" type="button" data-add="link">Add link</button>
+          <button class="button secondary compact" type="button" data-add="link">添加链接</button>
         </aside>
       </section>
     </section>
@@ -824,7 +824,7 @@ function renderForm() {
   editorMount.innerHTML = `
     <div class="editor-toolbar">
       <div>
-        <h2>Visual Editor</h2>
+        <h2>可视化编辑器</h2>
         <p>像正式页面一样直接编辑文字和图片。修改后点击保存，公开页面刷新后会看到最新资料。</p>
         <span class="save-state ${isDirty ? "dirty" : ""}" data-save-state>${
           isDirty ? "有未保存修改" : "已同步"
@@ -846,7 +846,7 @@ function renderForm() {
           <input type="file" accept="application/json,.json" data-backup-upload />
         </label>
         <button class="button secondary" type="button" data-toggle-form>详细表单</button>
-        <button class="button secondary" type="button" data-toggle-json>Advanced JSON</button>
+        <button class="button secondary" type="button" data-toggle-json>高级 JSON</button>
         <button class="button primary" type="button" data-save-profile>保存到数据库</button>
       </div>
     </div>
@@ -856,7 +856,7 @@ function renderForm() {
     ${renderMessagesPanel()}
 
     <details class="form-details">
-      <summary>Detailed form</summary>
+      <summary>详细表单</summary>
       <form class="profile-form" data-profile-form>
         ${section(
           "首页与基础信息",
@@ -903,11 +903,11 @@ function renderForm() {
     </details>
 
     <details class="json-details">
-      <summary>Advanced JSON</summary>
+      <summary>高级 JSON</summary>
       <textarea class="json-editor" data-json-editor spellcheck="false">${escapeHtml(
         JSON.stringify(currentProfile, null, 2),
       )}</textarea>
-      <button class="button secondary" type="button" data-apply-json>Apply JSON to form</button>
+      <button class="button secondary" type="button" data-apply-json>应用 JSON 到表单</button>
     </details>
   `;
 }
@@ -1073,7 +1073,7 @@ function syncIdentity() {
 
   writeDraft(currentProfile);
   renderForm();
-  markDirty("已同步姓名、标题、页脚和邮箱链接。点击 Save to database 后发布。");
+  markDirty("已同步姓名、标题、页脚和邮箱链接。点击保存到数据库后发布。");
 }
 
 async function loadProfile() {
@@ -1166,7 +1166,7 @@ async function uploadSelectedImage(input) {
 
   currentProfile = collectProfileFromForm();
   writeDraft(currentProfile);
-  markDirty("图片已上传。点击 Save to database 后公开页面会使用新图片。");
+  markDirty("图片已上传。点击保存到数据库后公开页面会使用新图片。");
 }
 
 async function uploadSelectedFile(input) {
@@ -1251,7 +1251,7 @@ function addItem(type, groupIndex) {
 
   writeDraft(currentProfile);
   renderForm();
-  markDirty("已添加内容。点击 Save to database 后发布。");
+  markDirty("已添加内容。点击保存到数据库后发布。");
 }
 
 function removeItem(type, index, groupIndex) {
@@ -1268,7 +1268,7 @@ function removeItem(type, index, groupIndex) {
 
   writeDraft(currentProfile);
   renderForm();
-  markDirty("已删除内容。点击 Save to database 后发布。");
+  markDirty("已删除内容。点击保存到数据库后发布。");
 }
 
 function moveArrayItem(items, index, direction) {
@@ -1413,7 +1413,7 @@ async function init() {
 
 loginForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
-  setStatus(loginStatus, "Signing in...");
+  setStatus(loginStatus, "正在登录...");
 
   const formData = new FormData(loginForm);
   const email = formData.get("email");
@@ -1431,7 +1431,7 @@ loginForm?.addEventListener("submit", async (event) => {
 });
 
 signUpButton?.addEventListener("click", async () => {
-  setStatus(loginStatus, "Creating account...");
+  setStatus(loginStatus, "正在创建账号...");
 
   const formData = new FormData(loginForm);
   const email = formData.get("email");
@@ -1474,7 +1474,7 @@ resendConfirmationButton?.addEventListener("click", async () => {
     return;
   }
 
-  setStatus(loginStatus, "Sending confirmation email...");
+  setStatus(loginStatus, "正在发送确认邮件...");
 
   const { error } = await supabase.auth.resend({
     type: "signup",

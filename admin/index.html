@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Portfolio Admin</title>
+    <title>作品集后台</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23087982'/%3E%3Cpath d='M8 22 15.7 7h2.7L26 22h-3.2l-1.5-3.2h-8.7L11.1 22H8Zm5.7-5.7h6.5L17 9.7l-3.3 6.6Z' fill='white'/%3E%3C/svg%3E"
@@ -15,11 +15,11 @@
       <section class="admin-panel">
         <div class="admin-header">
           <div>
-            <a class="admin-back" href="../">← Back to site</a>
-            <h1>Portfolio Admin</h1>
+            <a class="admin-back" href="../">← 返回公开页</a>
+            <h1>作品集后台</h1>
             <p>登录后可从公网编辑并保存个人资料。公开页面会自动读取最新数据库内容。</p>
           </div>
-          <button class="button secondary" type="button" data-sign-out hidden>Sign out</button>
+          <button class="button secondary" type="button" data-sign-out hidden>退出登录</button>
         </div>
 
         <div class="setup-warning" data-setup-warning hidden>
@@ -29,18 +29,18 @@
 
         <form class="admin-login" data-login-form>
           <label>
-            <span>Email</span>
+            <span>邮箱</span>
             <input type="email" name="email" placeholder="you@example.com" required />
           </label>
           <label>
-            <span>Password</span>
-            <input type="password" name="password" placeholder="Your Supabase password" required />
+            <span>密码</span>
+            <input type="password" name="password" placeholder="你的 Supabase 登录密码" required />
           </label>
           <div class="admin-login-actions">
-            <button class="button primary" type="submit">Sign in</button>
-            <button class="button secondary" type="button" data-sign-up>Create account</button>
+            <button class="button primary" type="submit">登录</button>
+            <button class="button secondary" type="button" data-sign-up>创建账号</button>
             <button class="button secondary" type="button" data-resend-confirmation>
-              Resend confirmation
+              重发确认邮件
             </button>
           </div>
           <p class="form-status" data-login-status role="status"></p>
