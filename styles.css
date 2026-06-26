@@ -998,6 +998,22 @@ textarea {
   align-items: center;
 }
 
+.visual-editor .quick-facts {
+  align-items: stretch;
+}
+
+.visual-editor .quick-facts li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.visual-editor .quick-facts .visual-editable {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .visual-project-card .project-links span {
   color: var(--accent);
   font-weight: 780;
@@ -1337,6 +1353,7 @@ textarea {
 
   .visual-skill-card-header,
   .visual-skill-item,
+  .visual-editor .quick-facts li,
   .visual-link-row,
   .visual-form-labels,
   .visual-project-labels {

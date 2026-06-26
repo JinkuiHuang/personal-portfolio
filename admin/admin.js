@@ -192,6 +192,22 @@ function imageUploader(label, targetPath, currentUrl, previewSelector) {
   `;
 }
 
+function fileUploader(label, targetPath, currentUrl, accept = ".pdf,.doc,.docx,image/*") {
+  return `
+    <div class="visual-upload">
+      <span>${escapeHtml(label)}</span>
+      <input type="hidden" data-path="${escapeHtml(targetPath)}" value="${escapeHtml(currentUrl || "")}" />
+      <label class="upload-button">
+        Choose file
+        <input type="file" accept="${escapeHtml(accept)}" data-file-upload data-file-target="${escapeHtml(
+          targetPath,
+        )}" />
+      </label>
+      <small>${escapeHtml(currentUrl || "No file selected")}</small>
+    </div>
+  `;
+}
+
 async function loadLocalDefault() {
   localDefault = await fetch("../data/profile.json").then((response) => response.json());
   return localDefault;
@@ -440,18 +456,21 @@ function renderVisualEditor() {
             <span class="button primary"><span aria-hidden="true">↓</span>${editable("hero.resumeLabel")}</span>
             <span class="button secondary"><span aria-hidden="true">□</span>${editable("hero.workLabel")}</span>
           </div>
+          ${fileUploader("简历文件", "hero.resumeUrl", currentProfile.hero?.resumeUrl)}
           <ul class="quick-facts" aria-label="快速联系方式">
             ${(currentProfile.hero?.facts || [])
               .map(
                 (fact, index) => `
-                  <li>
-                    <span aria-hidden="true">${escapeHtml(fact.icon)}</span>
-                    ${visualText(fact.text, `data-path="hero.facts.${index}.text"`)}
+                  <li data-fact-row>
+                    ${visualText(fact.icon, "data-fact-icon")}
+                    ${visualText(fact.text, "data-fact-text")}
+                    <button class="visual-remove inline" type="button" data-remove="fact" data-index="${index}">删除</button>
                   </li>
                 `,
               )
               .join("")}
           </ul>
+          <button class="button secondary compact" type="button" data-add="fact">Add quick info</button>
         </div>
         <figure class="hero-media visual-image-editor">
           <img data-image-preview="hero.image" src="${escapeHtml(previewAssetUrl(currentProfile.hero?.image))}" alt="${escapeHtml(currentProfile.hero?.imageAlt)}" />
@@ -826,6 +845,11 @@ function collectProfileFromForm() {
     href: readValue(row.querySelector("[data-nav-href]")),
   }));
 
+  next.hero.facts = [...editorMount.querySelectorAll("[data-fact-row]")].map((row) => ({
+    icon: readValue(row.querySelector("[data-fact-icon]")),
+    text: readValue(row.querySelector("[data-fact-text]")),
+  }));
+
   next.details.items = [...editorMount.querySelectorAll("[data-detail-row]")].map((row) => ({
     label: readValue(row.querySelector("[data-detail-label]")),
     value: readValue(row.querySelector("[data-detail-value]")),
@@ -1064,6 +1088,50 @@ async function uploadSelectedImage(input) {
   markDirty("图片已上传。点击 Save to database 后公开页面会使用新图片。");
 }
 
+async function uploadSelectedFile(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  if (!supabase) {
+    setEditorStatus("当前未连接 Supabase，无法上传文件。", true);
+    return;
+  }
+
+  const safeName = file.name
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const filePath = `${profileId}/files/${Date.now()}-${safeName || "file"}`;
+  setEditorStatus("正在上传文件...");
+
+  const { error } = await supabase.storage.from("portfolio-assets").upload(filePath, file, {
+    cacheControl: "3600",
+    upsert: true,
+  });
+
+  if (error) {
+    setEditorStatus(`文件上传失败：${error.message}`, true);
+    return;
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("portfolio-assets").getPublicUrl(filePath);
+
+  if (input.dataset.fileTarget) {
+    const hidden = editorMount.querySelector(`[data-path="${CSS.escape(input.dataset.fileTarget)}"]`);
+    if (hidden) hidden.value = publicUrl;
+  }
+
+  const label = input.closest(".visual-upload");
+  const small = label?.querySelector("small");
+  if (small) small.textContent = publicUrl;
+
+  currentProfile = collectProfileFromForm();
+  writeDraft(currentProfile);
+  markDirty("文件已上传。点击保存到数据库后公开页面会使用新文件。");
+}
+
 function addItem(type, groupIndex) {
   currentProfile = collectProfileFromForm();
 
@@ -1072,6 +1140,10 @@ function addItem(type, groupIndex) {
   }
   if (type === "nav") {
     currentProfile.nav.push({ label: "New nav", href: "#" });
+  }
+  if (type === "fact") {
+    currentProfile.hero.facts = currentProfile.hero.facts || [];
+    currentProfile.hero.facts.push({ icon: "•", text: "New info" });
   }
   if (type === "skillGroup") {
     currentProfile.skills.groups.push({ icon: "•", title: "New group", items: [] });
@@ -1106,6 +1178,7 @@ function removeItem(type, index, groupIndex) {
 
   if (type === "details") currentProfile.details.items.splice(index, 1);
   if (type === "nav") currentProfile.nav.splice(index, 1);
+  if (type === "fact") currentProfile.hero.facts?.splice(index, 1);
   if (type === "skillGroup") currentProfile.skills.groups.splice(index, 1);
   if (type === "skillItem") currentProfile.skills.groups[groupIndex].items.splice(index, 1);
   if (type === "experience") currentProfile.experience.items.splice(index, 1);
@@ -1329,9 +1402,16 @@ editor?.addEventListener("click", async (event) => {
 });
 
 editor?.addEventListener("change", async (event) => {
-  const input = event.target.closest("[data-image-upload]");
-  if (!input) return;
-  await uploadSelectedImage(input);
+  const imageInput = event.target.closest("[data-image-upload]");
+  if (imageInput) {
+    await uploadSelectedImage(imageInput);
+    return;
+  }
+
+  const fileInput = event.target.closest("[data-file-upload]");
+  if (fileInput) {
+    await uploadSelectedFile(fileInput);
+  }
 });
 
 editor?.addEventListener("input", (event) => {
