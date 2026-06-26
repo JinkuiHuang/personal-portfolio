@@ -50,3 +50,45 @@ create trigger set_portfolio_profiles_updated_at
 before insert or update on public.portfolio_profiles
 for each row
 execute function public.set_portfolio_updated_at();
+
+insert into storage.buckets (id, name, public)
+values ('portfolio-assets', 'portfolio-assets', true)
+on conflict (id) do update
+set public = excluded.public;
+
+drop policy if exists "Portfolio assets are publicly readable" on storage.objects;
+create policy "Portfolio assets are publicly readable"
+on storage.objects
+for select
+using (bucket_id = 'portfolio-assets');
+
+drop policy if exists "Only owner can upload portfolio assets" on storage.objects;
+create policy "Only owner can upload portfolio assets"
+on storage.objects
+for insert
+with check (
+  bucket_id = 'portfolio-assets'
+  and auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+);
+
+drop policy if exists "Only owner can update portfolio assets" on storage.objects;
+create policy "Only owner can update portfolio assets"
+on storage.objects
+for update
+using (
+  bucket_id = 'portfolio-assets'
+  and auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+)
+with check (
+  bucket_id = 'portfolio-assets'
+  and auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+);
+
+drop policy if exists "Only owner can delete portfolio assets" on storage.objects;
+create policy "Only owner can delete portfolio assets"
+on storage.objects
+for delete
+using (
+  bucket_id = 'portfolio-assets'
+  and auth.jwt() ->> 'email' = 'jacksonhuang.hjk@qq.com'
+);

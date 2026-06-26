@@ -17,7 +17,7 @@ python3 -m http.server 5173
 - 头像和作品图在 `assets/`
 - 后台页面在 `admin/`
 
-替换头像时，把新图片放到 `assets/profile.png`，或修改 `data/profile.json` 里的 `hero.image`。
+后台支持直接点击 `Choose file` 上传头像和项目图片。上传后的图片会保存到 Supabase Storage 的 `portfolio-assets` bucket。
 
 ## 开启公网后台编辑
 
@@ -47,6 +47,13 @@ window.PORTFOLIO_SUPABASE = {
 打开 Supabase 的 `SQL Editor`，复制 `supabase/schema.sql` 内容执行。
 
 SQL 已配置后台登录邮箱：`jacksonhuang.hjk@qq.com`。
+
+这份 SQL 会创建：
+
+- `portfolio_profiles` 资料表
+- `portfolio-assets` 图片存储 bucket
+- 公开读取权限
+- 仅允许 `jacksonhuang.hjk@qq.com` 登录后写入资料和上传图片
 
 ### 4. 创建后台登录账号
 

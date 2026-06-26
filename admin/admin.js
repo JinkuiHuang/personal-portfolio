@@ -112,6 +112,22 @@ function previewAssetUrl(url = "") {
   return value;
 }
 
+function imageUploader(label, targetPath, currentUrl, previewSelector) {
+  return `
+    <div class="visual-upload">
+      <span>${escapeHtml(label)}</span>
+      <input type="hidden" data-path="${escapeHtml(targetPath)}" value="${escapeHtml(currentUrl || "")}" />
+      <label class="upload-button">
+        Choose file
+        <input type="file" accept="image/*" data-image-upload data-image-target="${escapeHtml(
+          targetPath,
+        )}" data-preview-target="${escapeHtml(previewSelector)}" />
+      </label>
+      <small>${escapeHtml(currentUrl || "No image selected")}</small>
+    </div>
+  `;
+}
+
 async function loadLocalDefault() {
   localDefault = await fetch("../data/profile.json").then((response) => response.json());
   return localDefault;
@@ -326,7 +342,7 @@ function renderVisualEditor() {
     <section class="visual-editor" data-visual-editor>
       <div class="visual-note">
         <strong>可视化编辑模式</strong>
-        <span>直接点击页面里的文字修改。图片可在图片下方输入新的图片路径或网址。</span>
+        <span>直接点击页面里的文字修改。图片使用 Choose file 选择文件上传。</span>
       </div>
 
       <section class="hero section visual-section">
@@ -350,8 +366,8 @@ function renderVisualEditor() {
           </ul>
         </div>
         <figure class="hero-media visual-image-editor">
-          <img src="${escapeHtml(previewAssetUrl(currentProfile.hero?.image))}" alt="${escapeHtml(currentProfile.hero?.imageAlt)}" />
-          <label><span>头像图片路径</span><input data-path="hero.image" value="${escapeHtml(currentProfile.hero?.image)}" /></label>
+          <img data-image-preview="hero.image" src="${escapeHtml(previewAssetUrl(currentProfile.hero?.image))}" alt="${escapeHtml(currentProfile.hero?.imageAlt)}" />
+          ${imageUploader("头像图片", "hero.image", currentProfile.hero?.image, "hero.image")}
           <label><span>图片说明</span><input data-path="hero.imageAlt" value="${escapeHtml(currentProfile.hero?.imageAlt)}" /></label>
         </figure>
       </section>
@@ -439,8 +455,16 @@ function renderVisualEditor() {
             .map(
               (project, index) => `
                 <article class="project-card visual-project-card" data-project-row>
-                  <img src="${escapeHtml(previewAssetUrl(project.image))}" alt="${escapeHtml(project.imageAlt)}" />
-                  <label><span>图片路径</span><input data-project-image value="${escapeHtml(project.image)}" /></label>
+                  <img data-image-preview="project.${index}.image" src="${escapeHtml(previewAssetUrl(project.image))}" alt="${escapeHtml(project.imageAlt)}" />
+                  <div class="visual-upload">
+                    <span>项目图片</span>
+                    <input type="hidden" data-project-image value="${escapeHtml(project.image || "")}" />
+                    <label class="upload-button">
+                      Choose file
+                      <input type="file" accept="image/*" data-image-upload data-project-index="${index}" data-preview-target="project.${index}.image" />
+                    </label>
+                    <small>${escapeHtml(project.image || "No image selected")}</small>
+                  </div>
                   <label><span>图片说明</span><input data-project-alt value="${escapeHtml(project.imageAlt)}" /></label>
                   <h3>${visualText(project.title, "data-project-title")}</h3>
                   <p>${visualTextarea(project.description, "data-project-description")}</p>
@@ -606,6 +630,59 @@ async function saveProfile() {
 
   renderForm();
   setStatus(editorStatus, "已保存。公开页面刷新后会读取最新资料。");
+}
+
+async function uploadSelectedImage(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  if (!supabase) {
+    setStatus(editorStatus, "当前未连接 Supabase，无法上传图片。", true);
+    return;
+  }
+
+  const safeName = file.name
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const filePath = `${profileId}/${Date.now()}-${safeName || "image"}`;
+  setStatus(editorStatus, "正在上传图片...");
+
+  const { error } = await supabase.storage.from("portfolio-assets").upload(filePath, file, {
+    cacheControl: "3600",
+    upsert: true,
+  });
+
+  if (error) {
+    setStatus(editorStatus, `图片上传失败：${error.message}`, true);
+    return;
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("portfolio-assets").getPublicUrl(filePath);
+
+  const preview = editorMount.querySelector(
+    `[data-image-preview="${CSS.escape(input.dataset.previewTarget)}"]`,
+  );
+  if (preview) preview.src = publicUrl;
+
+  if (input.dataset.imageTarget) {
+    const hidden = editorMount.querySelector(`[data-path="${CSS.escape(input.dataset.imageTarget)}"]`);
+    if (hidden) hidden.value = publicUrl;
+  }
+
+  if (input.dataset.projectIndex) {
+    const row = input.closest("[data-project-row]");
+    const hidden = row?.querySelector("[data-project-image]");
+    if (hidden) hidden.value = publicUrl;
+  }
+
+  const label = input.closest(".visual-upload");
+  const small = label?.querySelector("small");
+  if (small) small.textContent = publicUrl;
+
+  setStatus(editorStatus, "图片已上传。点击 Save to database 后公开页面会使用新图片。");
 }
 
 function addItem(type, groupIndex) {
@@ -809,6 +886,12 @@ editor?.addEventListener("click", async (event) => {
   if (button.dataset.remove) {
     removeItem(button.dataset.remove, Number(button.dataset.index), Number(button.dataset.groupIndex));
   }
+});
+
+editor?.addEventListener("change", async (event) => {
+  const input = event.target.closest("[data-image-upload]");
+  if (!input) return;
+  await uploadSelectedImage(input);
 });
 
 init().catch((error) => {
